@@ -1,0 +1,24 @@
+server:
+  port: ${SERVER_PORT:8091}
+
+spring:
+  application:
+    name: log-service
+  datasource:
+    url: ${LOG_DB_URL:jdbc:mysql://127.0.0.1:3306/energy_log?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${LOG_DB_USERNAME:energy_log_user}
+    password: ${LOG_DB_PASSWORD:energy_log_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
