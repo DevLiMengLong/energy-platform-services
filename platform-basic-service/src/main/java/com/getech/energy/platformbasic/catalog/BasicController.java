@@ -330,6 +330,21 @@ public class BasicController {
         return ApiResponse.ok(result, TraceContext.getTraceId(request));
     }
 
+    @PostMapping("/actions")
+    public ApiResponse<Map<String, Object>> acceptAction(@Valid @RequestBody CatalogActionRequest body,
+                                                         HttpServletRequest request) {
+        CurrentUser user = AuthContext.requireUser();
+        logClient.operation(TraceContext.getTraceId(request), user, body.moduleCode(), body.actionCode(), body.actionName(),
+                body.moduleCode(), body.targetId() == null ? null : String.valueOf(body.targetId()), request, true,
+                "basic action accepted");
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("accepted", true);
+        result.put("moduleCode", body.moduleCode());
+        result.put("actionCode", body.actionCode());
+        result.put("targetId", body.targetId());
+        return ApiResponse.ok(result, TraceContext.getTraceId(request));
+    }
+
     private ApiResponse<PageResult> page(String resource, String keyword, int page, int size, HttpServletRequest request) {
         return ApiResponse.ok(resourceService.page(resource, AuthContext.requireUser(), keyword, page, size, filters(request)),
                 TraceContext.getTraceId(request));

@@ -158,6 +158,45 @@ class PlatformBasicApiTest {
                 .andExpect(jsonPath("$.data.energyName").value("蒸汽"));
     }
 
+    @Test
+    void genericCatalogActionsAreAcceptedForPlatformAndBasicModules() throws Exception {
+        String platformToken = login("admin", "admin123");
+        mockMvc.perform(post("/api/platform/actions")
+                        .header("Authorization", "Bearer " + platformToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "moduleCode": "platform.tenants",
+                                  "actionCode": "exportTenants",
+                                  "actionName": "导出租户",
+                                  "targetId": 1,
+                                  "targetName": "全链路测试工厂"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accepted").value(true))
+                .andExpect(jsonPath("$.data.moduleCode").value("platform.tenants"))
+                .andExpect(jsonPath("$.data.actionCode").value("exportTenants"));
+
+        String basicToken = login("tenant_a_admin", "admin123");
+        mockMvc.perform(post("/api/basic/actions")
+                        .header("Authorization", "Bearer " + basicToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "moduleCode": "basic.users",
+                                  "actionCode": "disableUsers",
+                                  "actionName": "停用用户",
+                                  "targetId": 1,
+                                  "targetName": "能源主管"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accepted").value(true))
+                .andExpect(jsonPath("$.data.moduleCode").value("basic.users"))
+                .andExpect(jsonPath("$.data.actionCode").value("disableUsers"));
+    }
+
     private String login(String account, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/basic/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

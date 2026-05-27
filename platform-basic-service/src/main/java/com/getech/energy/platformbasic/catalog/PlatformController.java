@@ -129,6 +129,21 @@ public class PlatformController {
         return ApiResponse.ok(null, TraceContext.getTraceId(request));
     }
 
+    @PostMapping("/actions")
+    public ApiResponse<Map<String, Object>> acceptAction(@Valid @RequestBody CatalogActionRequest body,
+                                                         HttpServletRequest request) {
+        CurrentUser user = requirePlatformAdmin();
+        logClient.operation(TraceContext.getTraceId(request), user, body.moduleCode(), body.actionCode(), body.actionName(),
+                body.moduleCode(), body.targetId() == null ? null : String.valueOf(body.targetId()), request, true,
+                "platform action accepted");
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("accepted", true);
+        result.put("moduleCode", body.moduleCode());
+        result.put("actionCode", body.actionCode());
+        result.put("targetId", body.targetId());
+        return ApiResponse.ok(result, TraceContext.getTraceId(request));
+    }
+
     private CurrentUser requirePlatformAdmin() {
         CurrentUser user = AuthContext.requireUser();
         if (!user.platformAdmin()) {
