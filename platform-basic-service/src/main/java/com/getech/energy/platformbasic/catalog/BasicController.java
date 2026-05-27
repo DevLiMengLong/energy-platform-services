@@ -8,6 +8,7 @@ import com.getech.energy.platformbasic.common.TraceContext;
 import com.getech.energy.platformbasic.logging.LogClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -44,8 +45,10 @@ public class BasicController {
     }
 
     @GetMapping("/org-nodes/tree")
-    public ApiResponse<List<Map<String, Object>>> orgTree(HttpServletRequest request) {
-        return ApiResponse.ok(treeService.orgTree(AuthContext.requireUser()), TraceContext.getTraceId(request));
+    public ApiResponse<List<Map<String, Object>>> orgTree(@RequestParam(name = "keyword", required = false) String keyword,
+                                                          @RequestParam(name = "parentKeyword", required = false) String parentKeyword,
+                                                          HttpServletRequest request) {
+        return ApiResponse.ok(treeService.orgTree(AuthContext.requireUser(), keyword, parentKeyword), TraceContext.getTraceId(request));
     }
 
     @PostMapping("/org-nodes/move")
@@ -328,7 +331,18 @@ public class BasicController {
     }
 
     private ApiResponse<PageResult> page(String resource, String keyword, int page, int size, HttpServletRequest request) {
-        return ApiResponse.ok(resourceService.page(resource, AuthContext.requireUser(), keyword, page, size),
+        return ApiResponse.ok(resourceService.page(resource, AuthContext.requireUser(), keyword, page, size, filters(request)),
                 TraceContext.getTraceId(request));
+    }
+
+    private Map<String, String> filters(HttpServletRequest request) {
+        Map<String, String> filters = new LinkedHashMap<>();
+        request.getParameterMap().forEach((key, values) -> {
+            if ("page".equals(key) || "size".equals(key) || "keyword".equals(key) || values.length == 0) {
+                return;
+            }
+            filters.put(key, values[0]);
+        });
+        return filters;
     }
 }

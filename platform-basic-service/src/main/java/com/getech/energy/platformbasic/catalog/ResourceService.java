@@ -22,11 +22,15 @@ public class ResourceService {
     }
 
     public PageResult page(String key, CurrentUser user, String keyword, int page, int size) {
+        return page(key, user, keyword, page, size, Map.of());
+    }
+
+    public PageResult page(String key, CurrentUser user, String keyword, int page, int size, Map<String, String> filters) {
         ResourceDefinition definition = registry.require(key);
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 200);
         Map<String, Object> params = new LinkedHashMap<>();
-        String where = buildWhere(definition, user, keyword, params);
+        String where = buildWhere(definition, user, keyword, filters, params);
         String countSql = "SELECT COUNT(1) FROM " + definition.fromClause() + " WHERE " + where;
         long total = jdbcClient.sql(countSql).params(params).query(Long.class).single();
         params.put("limit", safeSize);
@@ -46,7 +50,7 @@ public class ResourceService {
     public List<Map<String, Object>> all(String key, CurrentUser user, String keyword) {
         ResourceDefinition definition = registry.require(key);
         Map<String, Object> params = new LinkedHashMap<>();
-        String where = buildWhere(definition, user, keyword, params);
+        String where = buildWhere(definition, user, keyword, Map.of(), params);
         String listSql = "SELECT " + definition.selectColumns()
                 + " FROM " + definition.fromClause()
                 + " WHERE " + where
@@ -57,7 +61,8 @@ public class ResourceService {
                 .listOfRows();
     }
 
-    private String buildWhere(ResourceDefinition definition, CurrentUser user, String keyword, Map<String, Object> params) {
+    private String buildWhere(ResourceDefinition definition, CurrentUser user, String keyword,
+                              Map<String, String> filters, Map<String, Object> params) {
         StringBuilder where = new StringBuilder("(").append(definition.fixedCondition()).append(")");
         if (definition.tenantScoped()) {
             if (user.tenantId() == null) {
@@ -77,6 +82,18 @@ public class ResourceService {
             where.append(")");
             params.put("keyword", "%" + keyword.toLowerCase() + "%");
         }
+        filters.forEach((key, value) -> {
+            if (!StringUtils.hasText(value)) {
+                return;
+            }
+            String column = definition.filterColumns().get(key);
+            if (!StringUtils.hasText(column)) {
+                return;
+            }
+            String paramName = "filter_" + key;
+            where.append(" AND LOWER(CONCAT('', ").append(column).append(")) LIKE :").append(paramName);
+            params.put(paramName, "%" + value.toLowerCase() + "%");
+        });
         return where.toString();
     }
 }

@@ -9,6 +9,7 @@ import com.getech.energy.platformbasic.common.TraceContext;
 import com.getech.energy.platformbasic.logging.LogClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +44,7 @@ public class PlatformController {
                                            @RequestParam(name = "size", defaultValue = "10") int size,
                                            HttpServletRequest request) {
         requirePlatformAdmin();
-        return ApiResponse.ok(resourceService.page("platform.tenants", AuthContext.requireUser(), keyword, page, size),
+        return ApiResponse.ok(resourceService.page("platform.tenants", AuthContext.requireUser(), keyword, page, size, filters(request)),
                 TraceContext.getTraceId(request));
     }
 
@@ -78,7 +79,7 @@ public class PlatformController {
                                                 @RequestParam(name = "size", defaultValue = "10") int size,
                                                 HttpServletRequest request) {
         requirePlatformAdmin();
-        return ApiResponse.ok(resourceService.page("platform.tenant-admins", AuthContext.requireUser(), keyword, page, size),
+        return ApiResponse.ok(resourceService.page("platform.tenant-admins", AuthContext.requireUser(), keyword, page, size, filters(request)),
                 TraceContext.getTraceId(request));
     }
 
@@ -96,15 +97,16 @@ public class PlatformController {
                                               @RequestParam(name = "size", defaultValue = "10") int size,
                                               HttpServletRequest request) {
         requirePlatformAdmin();
-        return ApiResponse.ok(resourceService.page("platform.subsystems", AuthContext.requireUser(), keyword, page, size),
+        return ApiResponse.ok(resourceService.page("platform.subsystems", AuthContext.requireUser(), keyword, page, size, filters(request)),
                 TraceContext.getTraceId(request));
     }
 
     @GetMapping("/menus/tree")
     public ApiResponse<List<Map<String, Object>>> menus(@RequestParam(name = "subsystemCode", required = false) String subsystemCode,
+                                                        @RequestParam(name = "keyword", required = false) String keyword,
                                                         HttpServletRequest request) {
         requirePlatformAdmin();
-        return ApiResponse.ok(treeService.platformMenuTree(subsystemCode), TraceContext.getTraceId(request));
+        return ApiResponse.ok(treeService.platformMenuTree(subsystemCode, keyword), TraceContext.getTraceId(request));
     }
 
     @GetMapping("/tenant-permissions")
@@ -113,7 +115,7 @@ public class PlatformController {
                                                      @RequestParam(name = "size", defaultValue = "10") int size,
                                                      HttpServletRequest request) {
         requirePlatformAdmin();
-        return ApiResponse.ok(resourceService.page("platform.tenant-permissions", AuthContext.requireUser(), keyword, page, size),
+        return ApiResponse.ok(resourceService.page("platform.tenant-permissions", AuthContext.requireUser(), keyword, page, size, filters(request)),
                 TraceContext.getTraceId(request));
     }
 
@@ -133,5 +135,16 @@ public class PlatformController {
             throw new ApiException("FORBIDDEN", "Platform administrator permission is required");
         }
         return user;
+    }
+
+    private Map<String, String> filters(HttpServletRequest request) {
+        Map<String, String> filters = new LinkedHashMap<>();
+        request.getParameterMap().forEach((key, values) -> {
+            if ("page".equals(key) || "size".equals(key) || "keyword".equals(key) || values.length == 0) {
+                return;
+            }
+            filters.put(key, values[0]);
+        });
+        return filters;
     }
 }

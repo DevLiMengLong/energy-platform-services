@@ -18,20 +18,23 @@ public class TreeService {
         this.jdbcClient = jdbcClient;
     }
 
-    public List<Map<String, Object>> platformMenuTree(String subsystemCode) {
+    public List<Map<String, Object>> platformMenuTree(String subsystemCode, String keyword) {
         String sql = """
                 SELECT m.id, m.parent_id AS parentId, s.subsystem_code AS subsystemCode,
                        m.menu_type AS menuType, m.menu_code AS menuCode, m.permission_code AS permissionCode,
                        m.name_zh AS nameZh, m.name_en AS nameEn, m.icon, m.route_path AS routePath,
                        m.component_path AS componentPath, m.open_type AS openType, m.sort_order AS sortOrder,
-                       m.hidden, m.status
+                       m.hidden, m.status, m.created_at AS createdAt
                 FROM basic_menu m
                 JOIN basic_subsystem s ON s.id = m.subsystem_id
                 WHERE (:subsystemCode IS NULL OR s.subsystem_code = :subsystemCode)
+                  AND (:keyword IS NULL OR LOWER(m.name_zh) LIKE :keywordLike OR LOWER(m.name_en) LIKE :keywordLike OR LOWER(m.menu_code) LIKE :keywordLike)
                 ORDER BY s.sort_order, m.parent_id, m.sort_order, m.id
                 """;
         return buildTree(jdbcClient.sql(sql)
                 .param("subsystemCode", subsystemCode == null || subsystemCode.isBlank() ? null : subsystemCode)
+                .param("keyword", keyword == null || keyword.isBlank() ? null : keyword.toLowerCase())
+                .param("keywordLike", keyword == null || keyword.isBlank() ? null : "%" + keyword.toLowerCase() + "%")
                 .query()
                 .listOfRows());
     }
@@ -43,16 +46,23 @@ public class TreeService {
         return modulesWithMenus(user.tenantId(), false, user);
     }
 
-    public List<Map<String, Object>> orgTree(CurrentUser user) {
+    public List<Map<String, Object>> orgTree(CurrentUser user, String keyword, String parentKeyword) {
         requireTenant(user);
         return buildTree(jdbcClient.sql("""
-                        SELECT id, parent_id AS parentId, org_code AS code, org_name AS name,
-                               org_code AS orgCode, org_name AS orgName, sort_order AS sortOrder, status
-                        FROM basic_org_node
-                        WHERE tenant_id = :tenantId AND deleted = 0
-                        ORDER BY parent_id, sort_order, id
+                        SELECT o.id, o.parent_id AS parentId, o.org_code AS code, o.org_name AS name,
+                               o.org_code AS orgCode, o.org_name AS orgName, o.sort_order AS sortOrder, o.status
+                        FROM basic_org_node o
+                        LEFT JOIN basic_org_node p ON p.id = o.parent_id
+                        WHERE o.tenant_id = :tenantId AND o.deleted = 0
+                          AND (:keyword IS NULL OR LOWER(o.org_code) LIKE :keywordLike OR LOWER(o.org_name) LIKE :keywordLike)
+                          AND (:parentKeyword IS NULL OR LOWER(p.org_code) LIKE :parentKeywordLike OR LOWER(p.org_name) LIKE :parentKeywordLike)
+                        ORDER BY o.parent_id, o.sort_order, o.id
                         """)
                 .param("tenantId", user.tenantId())
+                .param("keyword", keyword == null || keyword.isBlank() ? null : keyword.toLowerCase())
+                .param("keywordLike", keyword == null || keyword.isBlank() ? null : "%" + keyword.toLowerCase() + "%")
+                .param("parentKeyword", parentKeyword == null || parentKeyword.isBlank() ? null : parentKeyword.toLowerCase())
+                .param("parentKeywordLike", parentKeyword == null || parentKeyword.isBlank() ? null : "%" + parentKeyword.toLowerCase() + "%")
                 .query()
                 .listOfRows());
     }

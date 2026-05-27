@@ -1,6 +1,7 @@
 package com.getech.energy.platformbasic;
 
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,6 +57,63 @@ class PlatformBasicApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.total").value(1))
                 .andExpect(jsonPath("$.data.rows[0].energyName").value("电"));
+    }
+
+    @Test
+    void platformListsHaveEnoughDemoRowsAndSupportFilters() throws Exception {
+        String token = login("admin", "admin123");
+
+        mockMvc.perform(get("/api/platform/tenants?page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total", greaterThanOrEqualTo(25)))
+                .andExpect(jsonPath("$.data.rows.length()").value(20));
+
+        mockMvc.perform(get("/api/platform/tenants?industry=电子制造&page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.rows[0].industry").value("电子制造"));
+
+        mockMvc.perform(get("/api/platform/menus/tree?subsystemCode=basic")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data[0].children.length()", greaterThanOrEqualTo(1)));
+
+        mockMvc.perform(get("/api/platform/menus/tree?subsystemCode=basic&keyword=用户")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()", greaterThanOrEqualTo(1)));
+    }
+
+    @Test
+    void tenantListsHaveEnoughDemoRowsAndSupportFieldFilters() throws Exception {
+        String token = login("tenant_a_admin", "admin123");
+
+        mockMvc.perform(get("/api/basic/users?page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total", greaterThanOrEqualTo(25)))
+                .andExpect(jsonPath("$.data.rows.length()").value(20));
+
+        mockMvc.perform(get("/api/basic/org-nodes/tree")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data[0].children.length()", greaterThanOrEqualTo(1)));
+
+        mockMvc.perform(get("/api/basic/users?roleName=能源主管&page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.rows[0].roleName").value("能源主管"));
+
+        mockMvc.perform(get("/api/basic/devices?bindingStatus=BOUND&page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.rows[0].bindingStatus").value("BOUND"));
     }
 
     @Test
