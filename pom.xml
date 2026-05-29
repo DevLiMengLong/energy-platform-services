@@ -11,6 +11,7 @@
 
     <modules>
         <module>platform-basic-service</module>
+        <module>energy-data-access</module>
         <module>log-service</module>
     </modules>
 

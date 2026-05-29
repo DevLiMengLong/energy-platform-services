@@ -1,0 +1,14 @@
+target/
+.idea/
+.vscode/
+*.iml
+
+*.log
+logs/
+*.pid
+
+.DS_Store
+
+deploy/*.local.yml
+application-*.local.yml
+

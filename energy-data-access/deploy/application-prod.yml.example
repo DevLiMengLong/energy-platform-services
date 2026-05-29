@@ -1,0 +1,51 @@
+server:
+  port: 8088
+
+spring:
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    producer:
+      properties:
+        max.block.ms: 3000
+    consumer:
+      group-id: raw-point-writer
+      auto-offset-reset: earliest
+    listener:
+      missing-topics-fatal: false
+  datasource:
+    url: jdbc:clickhouse://127.0.0.1:8123/default
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+    username: default
+    password:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+energy:
+  access:
+    internal-raw-topic: energy.raw.ingest
+    clean-pending-topic: energy.clean.pending
+    aggregate-pending-topic: energy.aggregate.pending
+    external-kafka:
+      topic: energy.external.ingest
+    external-mqtt:
+      enabled: false
+      broker-url: tcp://127.0.0.1:1883
+      client-id: energy-data-access
+      topic: v2/+/+/+/telemetry
+    storage:
+      type: clickhouse
+      auto-create-table: true
+      table-prefix: raw_param
+    cleaning:
+      config-refresh-ms: 240000
+      clean-table-prefix: clean_param
+      config-table: point_clean_config
+    aggregation:
+      minute-delay-seconds: 90
+      fifteen-minute-delay-seconds: 180
+      hour-delay-seconds: 300
+      day-delay-seconds: 600
+    latest:
+      redis-enabled: false
+      ttl-seconds: 0

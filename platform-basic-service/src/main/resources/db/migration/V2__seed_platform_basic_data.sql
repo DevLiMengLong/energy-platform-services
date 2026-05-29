@@ -6,7 +6,7 @@ INSERT INTO basic_tenant (id, tenant_mark, tenant_name, industry, contact_name, 
 INSERT INTO basic_subsystem (id, subsystem_code, name_zh, name_en, description, entry_url, status, sort_order) VALUES
 (1, 'platform', '平台管理', 'Platform Admin', '租户、子系统、菜单和租户授权', '/platform-admin/', 'ENABLED', 1),
 (2, 'basic', '基础信息', 'Basic Info', '组织、用户、能源、设备、点位、统计模型等基础数据', '/basic-info/', 'ENABLED', 2),
-(3, 'data-cleaning', '数据清洗', 'Data Cleaning', '工业数据清洗预留模块', '/placeholder/data-cleaning', 'ENABLED', 3),
+(3, 'cleaning', '数据清洗', 'Data Cleaning', '数据清洗配置与明细查询', '/data-cleaning/', 'ENABLED', 3),
 (4, 'report', '报表分析', 'Reports', '报表分析预留模块', '/placeholder/report', 'ENABLED', 4),
 (5, 'government', '政府平台对接', 'Government', '政府平台对接预留模块', '/placeholder/government', 'ENABLED', 5),
 (6, 'alarm', '告警通知', 'Alarms', 'Alarms', '/placeholder/alarm', 'ENABLED', 6);
@@ -31,20 +31,26 @@ INSERT INTO basic_menu (id, subsystem_id, parent_id, menu_type, menu_code, permi
 (21, 2, NULL, 'MENU', 'basic.unitConsumption', 'BASIC_UNIT_CONSUMPTION', '单耗配置', 'Unit Consumption', 'Scale', '/basic/unit-consumption', 'basic/UnitConsumptionPage', 12, 0, 'ENABLED'),
 (22, 2, NULL, 'MENU', 'basic.indicators', 'BASIC_INDICATOR', '指标配置', 'Indicators', 'Activity', '/basic/indicators', 'basic/IndicatorPage', 13, 0, 'ENABLED'),
 (23, 2, NULL, 'MENU', 'basic.collectionPoints', 'BASIC_COLLECTION_POINT', '采集点位', 'Collection Points', 'RadioTower', '/basic/collection-points', 'basic/CollectionPointPage', 14, 0, 'ENABLED'),
-(24, 2, NULL, 'MENU', 'basic.shifts', 'BASIC_SHIFT', '班次配置', 'Shifts', 'Clock3', '/basic/shifts', 'basic/ShiftPage', 15, 0, 'ENABLED');
+(24, 2, NULL, 'MENU', 'basic.shifts', 'BASIC_SHIFT', '班次配置', 'Shifts', 'Clock3', '/basic/shifts', 'basic/ShiftPage', 15, 0, 'ENABLED'),
+(30, 3, NULL, 'MENU', 'cleaning.config', 'CLEANING_CONFIG', '清洗配置', 'Cleaning Config', 'FlaskConical', '/cleaning/config', 'cleaning/ConfigPage', 1, 0, 'ENABLED'),
+(31, 3, NULL, 'MENU', 'cleaning.details', 'CLEANING_DETAILS', '清洗明细', 'Cleaning Details', 'FileSearch', '/cleaning/details', 'cleaning/DetailsPage', 2, 0, 'ENABLED');
 
 INSERT INTO basic_tenant_permission (tenant_id, subsystem_id, menu_id, permission_type, permission_code, granted) VALUES
 (1, 2, NULL, 'SUBSYSTEM', 'basic', 1),
-(1, 3, NULL, 'SUBSYSTEM', 'data-cleaning', 1),
+(1, 3, NULL, 'SUBSYSTEM', 'cleaning', 1),
 (1, 4, NULL, 'SUBSYSTEM', 'report', 1),
 (2, 2, NULL, 'SUBSYSTEM', 'basic', 1),
-(2, 3, NULL, 'SUBSYSTEM', 'data-cleaning', 1),
+(2, 3, NULL, 'SUBSYSTEM', 'cleaning', 1),
 (3, 2, NULL, 'SUBSYSTEM', 'basic', 1);
 
 INSERT INTO basic_tenant_permission (tenant_id, subsystem_id, menu_id, permission_type, permission_code, granted)
 SELECT 1, subsystem_id, id, 'MENU', permission_code, 1 FROM basic_menu WHERE subsystem_id = 2;
 INSERT INTO basic_tenant_permission (tenant_id, subsystem_id, menu_id, permission_type, permission_code, granted)
+SELECT 1, subsystem_id, id, 'MENU', permission_code, 1 FROM basic_menu WHERE subsystem_id = 3;
+INSERT INTO basic_tenant_permission (tenant_id, subsystem_id, menu_id, permission_type, permission_code, granted)
 SELECT 2, subsystem_id, id, 'MENU', permission_code, 1 FROM basic_menu WHERE subsystem_id = 2 AND id <= 18;
+INSERT INTO basic_tenant_permission (tenant_id, subsystem_id, menu_id, permission_type, permission_code, granted)
+SELECT 2, subsystem_id, id, 'MENU', permission_code, 1 FROM basic_menu WHERE subsystem_id = 3;
 INSERT INTO basic_tenant_permission (tenant_id, subsystem_id, menu_id, permission_type, permission_code, granted)
 SELECT 3, subsystem_id, id, 'MENU', permission_code, 1 FROM basic_menu WHERE subsystem_id = 2 AND id IN (10,11,15,23,24);
 

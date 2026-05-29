@@ -27,14 +27,16 @@ public class BasicController {
     private final ResourceService resourceService;
     private final TreeService treeService;
     private final MutationService mutationService;
+    private final CatalogActionService catalogActionService;
     private final JdbcClient jdbcClient;
     private final LogClient logClient;
 
     public BasicController(ResourceService resourceService, TreeService treeService, MutationService mutationService,
-                           JdbcClient jdbcClient, LogClient logClient) {
+                           CatalogActionService catalogActionService, JdbcClient jdbcClient, LogClient logClient) {
         this.resourceService = resourceService;
         this.treeService = treeService;
         this.mutationService = mutationService;
+        this.catalogActionService = catalogActionService;
         this.jdbcClient = jdbcClient;
         this.logClient = logClient;
     }
@@ -334,14 +336,10 @@ public class BasicController {
     public ApiResponse<Map<String, Object>> acceptAction(@Valid @RequestBody CatalogActionRequest body,
                                                          HttpServletRequest request) {
         CurrentUser user = AuthContext.requireUser();
+        Map<String, Object> result = catalogActionService.apply(user, body);
         logClient.operation(TraceContext.getTraceId(request), user, body.moduleCode(), body.actionCode(), body.actionName(),
                 body.moduleCode(), body.targetId() == null ? null : String.valueOf(body.targetId()), request, true,
                 "basic action accepted");
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("accepted", true);
-        result.put("moduleCode", body.moduleCode());
-        result.put("actionCode", body.actionCode());
-        result.put("targetId", body.targetId());
         return ApiResponse.ok(result, TraceContext.getTraceId(request));
     }
 

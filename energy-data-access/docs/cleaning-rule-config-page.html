@@ -1,0 +1,2749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数采清洗 - 清洗配置</title>
+  <style>
+    :root {
+      --bg: #f5fbfb;
+      --panel: #ffffff;
+      --line: #dbe9e6;
+      --line-strong: #bde0d6;
+      --text: #172033;
+      --muted: #64748b;
+      --green: #0f9f6e;
+      --green-dark: #087f5b;
+      --blue: #1976d2;
+      --red: #e05252;
+      --amber: #c47f12;
+      --shadow: 0 10px 28px rgba(18, 67, 86, .06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(15, 121, 103, .055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 121, 103, .055) 1px, transparent 1px),
+        var(--bg);
+      background-size: 36px 36px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button, input, select {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 224px 1fr auto;
+      align-items: center;
+      min-height: 56px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 56px;
+      padding: 0 16px;
+      border-right: 1px solid var(--line);
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0d9b73, #74c72f);
+      box-shadow: 0 8px 18px rgba(15, 159, 110, .2);
+    }
+
+    .brand-name {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .module-nav {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      height: 56px;
+      gap: 18px;
+    }
+
+    .module-nav button {
+      position: relative;
+      min-width: 84px;
+      padding: 0 8px;
+      border: 0;
+      background: transparent;
+      color: #334155;
+      cursor: default;
+    }
+
+    .module-nav button.active {
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    .module-nav button.active::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      bottom: 0;
+      left: 8px;
+      height: 3px;
+      background: var(--green);
+    }
+
+    .top-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      color: #334155;
+      font-size: 13px;
+    }
+
+    .tool-btn,
+    .lang-select {
+      min-height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      color: #334155;
+    }
+
+    .tool-btn {
+      width: 34px;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .lang-select {
+      padding: 0 10px;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 224px 1fr;
+      min-height: calc(100vh - 56px);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, .78);
+      padding: 14px 10px;
+    }
+
+    .collapse {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin-left: auto;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--green-dark);
+    }
+
+    .side-title {
+      margin: 12px 10px;
+      color: #718096;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .side-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 42px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #506176;
+      text-align: left;
+    }
+
+    .side-item svg {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+    }
+
+    .side-item.active {
+      background: linear-gradient(90deg, rgba(15, 159, 110, .14), rgba(15, 159, 110, .05));
+      color: var(--green-dark);
+      font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--green);
+    }
+
+    .content {
+      min-width: 0;
+      padding: 18px;
+    }
+
+    .page-view {
+      display: none;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    .breadcrumb {
+      margin: 0 0 12px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 70px;
+      margin-bottom: 12px;
+      padding: 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: linear-gradient(105deg, rgba(255, 255, 255, .98), rgba(237, 252, 246, .9));
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 34px;
+      padding: 0 13px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: #fff;
+      color: #1f2d3d;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn.danger {
+      border-color: rgba(224, 82, 82, .4);
+      color: var(--red);
+    }
+
+    .btn.link {
+      min-height: auto;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #0076a8;
+      font-weight: 700;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .panel {
+      position: relative;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .9);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .filter-panel {
+      z-index: 6;
+      overflow: visible;
+    }
+
+    .table-panel {
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .filters {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 138px 148px 148px 168px 116px 88px auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .detail-filters {
+      grid-template-columns: 120px 116px 116px 128px 108px 212px 212px auto;
+    }
+
+    .detail-filters input[type="datetime-local"] {
+      min-width: 212px;
+      padding-right: 8px;
+      font-size: 13px;
+    }
+
+    .filter-actions {
+      align-self: stretch;
+      align-items: flex-end;
+      flex-wrap: nowrap;
+      justify-content: flex-end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: #52637a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 34px;
+      padding: 0 10px;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      z-index: 8;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(15, 159, 110, .12);
+    }
+
+    .native-select {
+      display: none;
+    }
+
+    .custom-select {
+      position: relative;
+      z-index: 1;
+    }
+
+    .custom-select.open {
+      z-index: 30;
+    }
+
+    .custom-select-trigger {
+      position: relative;
+      width: 100%;
+      min-height: 34px;
+      padding: 0 28px 0 10px;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .custom-select-trigger::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      width: 7px;
+      height: 7px;
+      border-right: 1.5px solid #334155;
+      border-bottom: 1.5px solid #334155;
+      transform: translateY(-65%) rotate(45deg);
+    }
+
+    .custom-select.open .custom-select-trigger {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(15, 159, 110, .12);
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      bottom: auto;
+      right: 0;
+      left: 0;
+      z-index: 80;
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 12px 28px rgba(15, 60, 72, .14);
+    }
+
+    .custom-select.open .custom-select-menu {
+      display: block;
+    }
+
+    .custom-select-option {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 0;
+      background: #fff;
+      color: #334155;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .custom-select-option:hover,
+    .custom-select-option.selected {
+      background: #eaf8f2;
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    textarea {
+      display: block;
+      min-height: 52px;
+      padding: 7px 10px;
+      line-height: 20px;
+      resize: vertical;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .field-invalid {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(224, 82, 82, .1);
+    }
+
+    .field-error {
+      display: none;
+      color: var(--red);
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: center;
+      flex: 1 1 auto;
+    }
+
+    .field-error.show {
+      display: block;
+    }
+
+    .formula-field {
+      position: relative;
+    }
+
+    .formula-builder {
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .formula-display {
+      min-height: 48px;
+      padding: 11px 12px;
+      border-bottom: 1px solid #e4ebf1;
+      color: var(--text);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 14px;
+      line-height: 24px;
+      word-break: break-all;
+    }
+
+    .formula-display.empty {
+      color: #94a3b8;
+    }
+
+    .formula-check {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 10px;
+      border-bottom: 1px solid #e4ebf1;
+      color: #52637a;
+      font-size: 12px;
+    }
+
+    .formula-validity {
+      flex: 0 0 auto;
+      font-weight: 800;
+    }
+
+    .formula-validity.ok {
+      color: var(--green-dark);
+    }
+
+    .formula-validity.bad {
+      color: var(--red);
+    }
+
+    .formula-keypad {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid #eef3f6;
+    }
+
+    .formula-key {
+      min-height: 32px;
+      border: 0;
+      border-right: 1px solid #e4ebf1;
+      border-bottom: 1px solid #e4ebf1;
+      border-radius: 0;
+      background: #fff;
+      color: #334155;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .formula-key:nth-child(10n) {
+      border-right: 0;
+    }
+
+    .formula-key:hover {
+      background: #f1fbf7;
+      color: var(--green-dark);
+    }
+
+    .formula-key.command {
+      font-family: inherit;
+      color: #0b6f95;
+      font-weight: 800;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      min-height: 16px;
+      padding: 0;
+      margin: 0;
+      border-radius: 3px;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+      background: rgba(249, 253, 252, .9);
+    }
+
+    .pager-text {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pager {
+      position: relative;
+      z-index: 3;
+      gap: 8px;
+      overflow: visible;
+    }
+
+    .pager-total {
+      margin-right: 4px;
+      color: #64748b;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .page-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pager-btn,
+    .page-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid #d5e1e8;
+      border-radius: 6px;
+      background: #fff;
+      color: #334155;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .page-btn.active {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .pager-btn:disabled {
+      cursor: not-allowed;
+      color: #94a3b8;
+      background: #f4f8f8;
+    }
+
+    .pager-size {
+      position: relative;
+      z-index: 4;
+      width: 108px;
+      min-height: 30px;
+      margin-left: 4px;
+      padding-right: 28px;
+    }
+
+    .selection-strong {
+      color: var(--green-dark);
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .detail-table table {
+      min-width: 1320px;
+    }
+
+    .detail-table th:first-child,
+    .detail-table td:first-child {
+      padding-right: 12px;
+      padding-left: 12px;
+      text-align: left;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1400px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      height: 38px;
+      padding: 4px 12px;
+      border-bottom: 1px solid #e7eef3;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 14px;
+      line-height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    th {
+      height: 38px;
+      background: rgba(240, 248, 247, .88);
+      color: #52637a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    th:first-child,
+    td:first-child {
+      padding-right: 0;
+      padding-left: 0;
+      text-align: center;
+    }
+
+    tbody tr:hover {
+      background: rgba(240, 249, 246, .62);
+    }
+
+    th:last-child,
+    td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      min-width: 108px;
+      background: #fff;
+      box-shadow: -10px 0 18px rgba(15, 60, 72, .06);
+      overflow: visible;
+      text-overflow: clip;
+    }
+
+    th:last-child {
+      z-index: 2;
+      background: #f0f8f7;
+    }
+
+    tbody tr:hover td:last-child {
+      background: #f5fbf8;
+    }
+
+    td:last-child .btn.link + .btn.link {
+      margin-left: 8px;
+    }
+
+    code {
+      color: #006e9c;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .point-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 20px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #eef3f6;
+      color: #506176;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.green { background: #dff8ed; color: var(--green-dark); }
+    .badge.red { background: #fde8e8; color: var(--red); }
+    .badge.blue { background: #e8f2ff; color: #1260b8; }
+    .badge.amber { background: #fff4d8; color: var(--amber); }
+
+    .metric {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: #0f172a;
+      font-size: 13px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      background: rgba(15, 23, 42, .32);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .dialog {
+      width: min(1220px, calc(100vw - 24px));
+      max-height: calc(100vh - 16px);
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 28px 70px rgba(15, 23, 42, .24);
+    }
+
+    .detail-dialog {
+      width: min(1280px, calc(100vw - 24px));
+    }
+
+    .dialog-head,
+    .dialog-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dialog-foot {
+      justify-content: flex-end;
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+    }
+
+    .dialog-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .dialog-body {
+      display: grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: 10px 16px 12px;
+    }
+
+    .rule-form {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .form-section {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .section-title {
+      margin-bottom: 8px;
+      color: #1e2f44;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .formula-row {
+      grid-template-columns: 1fr;
+    }
+
+    .switch-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 126px);
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .switch-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfefe;
+    }
+
+    .switch-line strong {
+      display: block;
+      font-size: 13px;
+      line-height: 18px;
+    }
+
+    .switch {
+      position: relative;
+      width: 32px;
+      height: 18px;
+      flex: 0 0 auto;
+      display: block;
+      margin: 0;
+      line-height: 0;
+    }
+
+    .switch input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #cbd5e1;
+    }
+
+    .track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, .2);
+      transition: .18s ease;
+    }
+
+    .switch input:checked + .track {
+      background: var(--green);
+    }
+
+    .switch input:checked + .track::after {
+      transform: translateX(14px);
+    }
+
+    .field-help {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfb;
+      overflow: hidden;
+      align-self: stretch;
+    }
+
+    .field-help h2 {
+      margin: 0;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .field-help dl {
+      margin: 0;
+      padding: 1px 12px 9px;
+    }
+
+    .field-help dt {
+      margin-top: 7px;
+      color: #24364b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .field-help dd {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.36;
+    }
+
+    .field-help p {
+      margin: 2px 0 0;
+    }
+
+    .record-detail {
+      display: block;
+      padding: 8px 12px;
+    }
+
+    .detail-summary {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfb;
+      overflow: hidden;
+    }
+
+    .detail-summary h2,
+    .detail-fields h2 {
+      margin: 0;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .detail-summary dl,
+    .detail-fields dl {
+      margin: 0;
+      padding: 10px 12px;
+    }
+
+    .detail-summary dt,
+    .detail-fields dt {
+      color: #52637a;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .detail-summary dd,
+    .detail-fields dd {
+      margin: 4px 0 12px;
+      color: #1f2d3d;
+      line-height: 1.45;
+    }
+
+    .detail-fields {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 18px;
+    }
+
+    .detail-record-wrap {
+      padding: 0 8px;
+      overflow-x: auto;
+    }
+
+    .detail-record-table {
+      min-width: 980px;
+    }
+
+    .detail-record-table th,
+    .detail-record-table td {
+      height: 34px;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+
+    .detail-record-table th:first-child,
+    .detail-record-table td:first-child {
+      padding-left: 8px;
+      text-align: left;
+    }
+
+    .detail-record-table th:last-child,
+    .detail-record-table td:last-child {
+      position: static;
+      min-width: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .detail-record-table th:last-child {
+      background: rgba(240, 248, 247, .88);
+    }
+
+    .detail-query-bar {
+      display: grid;
+      grid-template-columns: 212px 212px 220px auto;
+      gap: 8px;
+      align-items: end;
+      padding: 8px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfefe;
+    }
+
+    .detail-point-title {
+      margin-bottom: 5px;
+      color: #52637a;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .detail-point-main {
+      font-weight: 800;
+    }
+
+    .detail-count-line {
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--line);
+      color: #52637a;
+      font-size: 13px;
+    }
+
+    .detail-record-pager {
+      padding: 8px;
+      border-top: 1px solid var(--line);
+    }
+
+    .rule-multi {
+      position: relative;
+    }
+
+    .rule-multi.open {
+      z-index: 45;
+    }
+
+    .rule-multi-trigger {
+      width: 100%;
+      min-height: 34px;
+      padding: 0 10px;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rule-multi-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 90;
+      display: none;
+      max-height: 190px;
+      overflow-y: auto;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 12px 28px rgba(15, 60, 72, .14);
+      padding: 5px;
+    }
+
+    .rule-multi.open .rule-multi-menu {
+      display: grid;
+      gap: 2px;
+    }
+
+    .rule-option {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 0 7px;
+      border-radius: 4px;
+      color: #334155;
+      font-size: 13px;
+    }
+
+    .rule-option:hover {
+      background: #eaf8f2;
+    }
+
+    .hint {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+      display: none;
+      min-width: 220px;
+      max-width: min(560px, calc(100vw - 32px));
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show { display: block; }
+    .toast.info { border-color: #9adfca; background: #e7f8f1; color: #087f5b; }
+    .toast.warn { border-color: #f3cd79; background: #fff7df; color: #9a620b; }
+    .toast.error { border-color: #f3a3a3; background: #fff0f0; color: #c83838; }
+
+    @media (max-width: 1180px) {
+      .top-nav { grid-template-columns: 1fr; }
+      .brand { border-right: 0; }
+      .module-nav { justify-content: flex-start; overflow-x: auto; padding: 0 12px; }
+      .top-tools { display: none; }
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .filters { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+      .dialog-body { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .content { padding: 12px; }
+      .hero,
+      .pager { display: grid; }
+      .actions { justify-content: flex-start; }
+      .filters,
+      .field-row,
+      .switch-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-mark">E</div>
+      <div class="brand-name">能源数据平台</div>
+    </div>
+    <nav class="module-nav" aria-label="顶部模块">
+      <button>平台管理</button>
+      <button>基础信息</button>
+      <button class="active">数采清洗</button>
+      <button>报表分析</button>
+      <button>政府平台对接</button>
+      <button>告警通知</button>
+    </nav>
+    <div class="top-tools">
+      <select class="lang-select"><option>简体中文</option><option>English</option></select>
+      <button class="tool-btn">⌕</button>
+      <button class="tool-btn">◎</button>
+      <span>租户超管 tenant_clean</span>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <button class="collapse">‹</button>
+      <div class="side-title">数采清洗 · 功能菜单</div>
+      <button class="side-item active" data-page="config">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16"/><path d="M7 5v6l-3 5h16l-3-5V5"/><path d="M9 16h6"/></svg>
+        清洗配置
+      </button>
+      <button class="side-item" data-page="detail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        清洗明细
+      </button>
+    </aside>
+
+    <main class="content">
+      <section class="page-view active" id="configPage">
+      <div class="breadcrumb">数采清洗 / 清洗配置</div>
+
+      <section class="hero">
+        <div>
+          <h1>清洗配置</h1>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="batchBtn">批量配置</button>
+          <button class="btn danger" id="batchDisableBtn">批量停用</button>
+          <button class="btn" id="reloadBtn">刷新缓存</button>
+        </div>
+      </section>
+
+      <section class="panel filter-panel">
+        <div class="panel-body">
+          <div class="filters">
+            <div>
+              <label for="modelFilter">模型标识</label>
+              <select id="modelFilter"><option value="">全部</option></select>
+            </div>
+            <div>
+              <label for="deviceFilter">设备标识</label>
+              <input id="deviceFilter" placeholder="请输入设备标识" />
+            </div>
+            <div>
+              <label for="paramFilter">测点标识</label>
+              <input id="paramFilter" placeholder="请输入测点标识" />
+            </div>
+            <div>
+              <label for="nameFilter">测点名称</label>
+              <input id="nameFilter" placeholder="请输入测点名称" />
+            </div>
+            <div>
+              <label for="statusFilter">配置状态</label>
+              <select id="statusFilter">
+                <option value="">全部</option>
+                <option value="true">已启用</option>
+                <option value="false">已停用</option>
+                <option value="unconfigured">未配置</option>
+              </select>
+            </div>
+            <div>
+              <label for="cumulativeFilter">累计量</label>
+              <select id="cumulativeFilter">
+                <option value="">全部</option>
+                <option value="true">是</option>
+                <option value="false">否</option>
+              </select>
+            </div>
+            <div class="actions filter-actions">
+              <button class="btn primary" id="queryBtn">查询</button>
+              <button class="btn" id="resetBtn">重置</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="table-wrap">
+          <table>
+            <colgroup>
+              <col style="width:52px" />
+              <col style="width:180px" />
+              <col style="width:68px" />
+              <col style="width:150px" />
+              <col style="width:136px" />
+              <col style="width:136px" />
+              <col style="width:96px" />
+              <col style="width:130px" />
+              <col style="width:112px" />
+              <col style="width:86px" />
+              <col style="width:96px" />
+              <col style="width:88px" />
+              <col style="width:110px" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="width:44px;"><input type="checkbox" id="checkAll" /></th>
+                <th>测点信息</th>
+                <th>单位</th>
+                <th>模型标识</th>
+                <th>设备标识</th>
+                <th>测点标识</th>
+                <th>转换公式</th>
+                <th>上下限</th>
+                <th>最大变化量</th>
+                <th>累计量</th>
+                <th>合法回零</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <span class="pager-total" id="pagerTotal"></span>
+          <button class="pager-btn" id="prevPageBtn">‹</button>
+          <div class="page-list" id="pageList"></div>
+          <button class="pager-btn" id="nextPageBtn">›</button>
+          <select class="pager-size" id="pageSize">
+            <option value="10">10 条/页</option>
+            <option value="20">20 条/页</option>
+            <option value="50">50 条/页</option>
+          </select>
+        </div>
+      </section>
+      </section>
+      <section class="page-view" id="detailPage">
+        <div class="breadcrumb">数采清洗 / 清洗明细</div>
+
+        <section class="hero">
+          <div>
+            <h1>清洗明细</h1>
+          </div>
+          <div class="actions">
+            <button class="btn" id="abnormalOnlyBtn">只看异常</button>
+            <button class="btn" id="exportDetailBtn">导出结果</button>
+          </div>
+        </section>
+
+        <section class="panel filter-panel">
+          <div class="panel-body">
+            <div class="filters detail-filters">
+              <div>
+                <label for="detailModelFilter">模型标识</label>
+                <select id="detailModelFilter"><option value="">全部</option></select>
+              </div>
+              <div>
+                <label for="detailDeviceFilter">设备标识</label>
+                <input id="detailDeviceFilter" placeholder="请输入设备标识" />
+              </div>
+              <div>
+                <label for="detailParamFilter">测点标识</label>
+                <input id="detailParamFilter" placeholder="请输入测点标识" />
+              </div>
+              <div>
+                <label for="detailNameFilter">测点名称</label>
+                <input id="detailNameFilter" placeholder="请输入测点名称" />
+              </div>
+              <div>
+                <label for="detailQualityFilter">清洗结果</label>
+                <select id="detailQualityFilter">
+                  <option value="">全部</option>
+                  <option value="normal">正常</option>
+                  <option value="abnormal">异常</option>
+                </select>
+              </div>
+              <div>
+                <label for="detailStartTime">设备时间起</label>
+                <input id="detailStartTime" type="datetime-local" step="1" />
+              </div>
+              <div>
+                <label for="detailEndTime">设备时间止</label>
+                <input id="detailEndTime" type="datetime-local" step="1" />
+              </div>
+              <div class="actions filter-actions">
+                <button class="btn primary" id="detailQueryBtn">查询</button>
+                <button class="btn" id="detailResetBtn">重置</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel table-panel detail-table">
+          <div class="table-wrap">
+            <table>
+              <colgroup>
+                <col style="width:180px" />
+                <col style="width:64px" />
+                <col style="width:132px" />
+                <col style="width:126px" />
+                <col style="width:126px" />
+                <col style="width:96px" />
+                <col style="width:96px" />
+                <col style="width:96px" />
+                <col style="width:154px" />
+                <col style="width:104px" />
+                <col style="width:116px" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>测点信息</th>
+                  <th>单位</th>
+                  <th>模型标识</th>
+                  <th>设备标识</th>
+                  <th>测点标识</th>
+                  <th>数据条数</th>
+                  <th>正常条数</th>
+                  <th>异常条数</th>
+                  <th>最近数据时间</th>
+                  <th>清洗结果</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="detailTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span class="pager-total" id="detailPagerTotal"></span>
+            <button class="pager-btn" id="detailPrevPageBtn">‹</button>
+            <div class="page-list" id="detailPageList"></div>
+            <button class="pager-btn" id="detailNextPageBtn">›</button>
+            <select class="pager-size" id="detailPageSize">
+              <option value="10">10 条/页</option>
+              <option value="20">20 条/页</option>
+              <option value="50">50 条/页</option>
+            </select>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <section class="modal" id="ruleModal" aria-hidden="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div>
+          <div class="dialog-title" id="modalTitle">批量配置清洗规则</div>
+        </div>
+        <button class="btn" id="closeModalBtn">关闭</button>
+      </div>
+      <div class="dialog-body">
+        <aside class="field-help">
+          <h2>字段说明</h2>
+          <dl>
+            <dt>处理顺序</dt>
+            <dd>
+              <p>系统先将原始值解析为数值；设备时间为空或早于 2000-01-01 时判为时间异常；再判断量程、累计倒退、合法回零和最大变化量；通过后按转换公式计算清洗值。</p>
+            </dd>
+            <dt>最小值 / 最大值</dt>
+            <dd>
+              <p>填写测点采集值解析后的合理范围，可单独填写一端。当前值低于最小值或高于最大值时判为量程越限。建议按具体设备、点位的实际量程配置。</p>
+            </dd>
+            <dt>最大变化量</dt>
+            <dd>
+              <p>有上一条有效数据时生效。系统比较当前解析值与上一有效解析值的差值绝对值，超过该阈值时判为突变异常。建议结合采集周期和工艺波动上限配置。</p>
+            </dd>
+            <dt>累计量</dt>
+            <dd>
+              <p>适用于电量、水量、气量、蒸汽量等只增不减的累计读数。开启后，当前解析值小于上一有效解析值时进入回零判断；不满足合法回零则判为累计倒退。</p>
+            </dd>
+            <dt>合法回零</dt>
+            <dd>
+              <p>用于表计到达高位后回到低位继续计数。需填写表计最大值、上一值下限、当前值上限；上一有效值达到下限且当前值低于上限时，可判为合法回零。</p>
+            </dd>
+            <dt>转换公式</dt>
+            <dd>
+              <p>用于把通过清洗判断的解析值计算为最终清洗值。可空，默认 x；支持 x、数字、小数点、空格、加减乘除和小括号，例如 x、x / 1000、(x - 4) * 25。</p>
+            </dd>
+            <dt>配置建议</dt>
+            <dd>
+              <p>不同设备即使模型和测点相同，量程、波动阈值和回零阈值也可能不同，建议按设备点位配置。瞬时量、温度、压力等非累计读数一般不开启累计量。</p>
+            </dd>
+          </dl>
+        </aside>
+
+        <div class="rule-form">
+          <section class="form-section">
+            <div class="section-title">异常数据规则</div>
+            <div class="field-row">
+              <div>
+                <label for="minValue">最小值</label>
+                <input id="minValue" placeholder="可空" />
+              </div>
+              <div>
+                <label for="maxValue">最大值</label>
+                <input id="maxValue" placeholder="可空" />
+              </div>
+              <div>
+                <label for="maxDelta">最大变化量</label>
+                <input id="maxDelta" placeholder="可空" />
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-title">累计与合法回零</div>
+            <div class="switch-grid">
+              <div class="switch-line">
+                <div><strong>累计量</strong></div>
+                <label class="switch"><input type="checkbox" id="cumulative" /><span class="track"></span></label>
+              </div>
+              <div class="switch-line">
+                <div><strong>合法回零</strong></div>
+                <label class="switch"><input type="checkbox" id="rolloverEnabled" /><span class="track"></span></label>
+              </div>
+            </div>
+            <div class="field-row">
+              <div>
+                <label for="rolloverMaxValue">表计最大值</label>
+                <input id="rolloverMaxValue" placeholder="可空" />
+              </div>
+              <div>
+                <label for="rolloverMinPreviousValue">上一值下限</label>
+                <input id="rolloverMinPreviousValue" placeholder="可空" />
+              </div>
+              <div>
+                <label for="rolloverMaxCurrentValue">当前值上限</label>
+                <input id="rolloverMaxCurrentValue" placeholder="可空" />
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-title">清洗值转换</div>
+            <div class="field-row formula-row">
+              <div class="formula-field">
+                <label for="transformFormula">转换公式</label>
+                <input id="transformFormula" type="hidden" />
+                <div class="formula-builder">
+                  <div class="formula-display" id="formulaDisplay"></div>
+                  <div class="formula-check">
+                    <span>公式合法性判断</span>
+                    <span class="field-error" id="formulaError">仅支持 x、数字、小数点、空格、+、-、*、/、(、)，并需符合四则运算格式</span>
+                    <span class="formula-validity" id="formulaValidity">合法</span>
+                  </div>
+                  <div class="formula-keypad" id="formulaKeypad">
+                    <button type="button" class="formula-key" data-token="x">x</button>
+                    <button type="button" class="formula-key" data-token="1">1</button>
+                    <button type="button" class="formula-key" data-token="2">2</button>
+                    <button type="button" class="formula-key" data-token="3">3</button>
+                    <button type="button" class="formula-key" data-token="4">4</button>
+                    <button type="button" class="formula-key" data-token="5">5</button>
+                    <button type="button" class="formula-key" data-token="6">6</button>
+                    <button type="button" class="formula-key" data-token="7">7</button>
+                    <button type="button" class="formula-key" data-token="8">8</button>
+                    <button type="button" class="formula-key" data-token="9">9</button>
+                    <button type="button" class="formula-key" data-token="0">0</button>
+                    <button type="button" class="formula-key" data-token=".">.</button>
+                    <button type="button" class="formula-key" data-token="+">+</button>
+                    <button type="button" class="formula-key" data-token="-">-</button>
+                    <button type="button" class="formula-key" data-token="*">*</button>
+                    <button type="button" class="formula-key" data-token="/">/</button>
+                    <button type="button" class="formula-key" data-token="(">(</button>
+                    <button type="button" class="formula-key" data-token=")">)</button>
+                    <button type="button" class="formula-key command" data-action="backspace">退格</button>
+                    <button type="button" class="formula-key command" data-action="clear">清屏</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn" id="cancelBtn">取消</button>
+        <button class="btn primary" id="saveBtn">保存配置</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="modal" id="cleanDetailModal" aria-hidden="true">
+    <div class="dialog detail-dialog">
+      <div class="dialog-head">
+        <div class="dialog-title">清洗明细详情</div>
+      </div>
+      <div class="record-detail">
+        <section class="detail-fields">
+          <div class="detail-query-bar">
+            <div>
+              <label for="detailModalStartTime">设备时间起</label>
+              <input id="detailModalStartTime" type="datetime-local" step="1" />
+            </div>
+            <div>
+              <label for="detailModalEndTime">设备时间止</label>
+              <input id="detailModalEndTime" type="datetime-local" step="1" />
+            </div>
+            <div class="rule-multi" id="detailRuleMulti">
+              <label>命中规则</label>
+              <button class="rule-multi-trigger" id="detailRuleTrigger" type="button">全部</button>
+              <div class="rule-multi-menu" id="detailRuleMenu"></div>
+            </div>
+            <div class="actions filter-actions">
+              <button class="btn primary" id="detailModalQueryBtn">查询</button>
+              <button class="btn" id="detailModalResetBtn">重置</button>
+            </div>
+          </div>
+          <div class="detail-record-wrap">
+            <table class="detail-record-table">
+              <colgroup>
+                <col style="width:150px" />
+                <col style="width:150px" />
+                <col style="width:86px" />
+                <col style="width:86px" />
+                <col style="width:86px" />
+                <col style="width:110px" />
+                <col style="width:70px" />
+                <col style="width:130px" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>设备时间</th>
+                  <th>接收时间</th>
+                  <th>原始值</th>
+                  <th>清洗值</th>
+                  <th>清洗结果</th>
+                  <th>清洗情况</th>
+                  <th>有效</th>
+                  <th>原始记录ID</th>
+                </tr>
+              </thead>
+              <tbody id="detailRecordFields"></tbody>
+            </table>
+          </div>
+          <div class="pager detail-record-pager">
+            <span class="pager-total" id="detailRecordPagerTotal"></span>
+            <button class="pager-btn" id="detailRecordPrevPageBtn">‹</button>
+            <div class="page-list" id="detailRecordPageList"></div>
+            <button class="pager-btn" id="detailRecordNextPageBtn">›</button>
+            <select class="pager-size" id="detailRecordPageSize">
+              <option value="5">5 条/页</option>
+              <option value="10">10 条/页</option>
+              <option value="20">20 条/页</option>
+            </select>
+          </div>
+        </section>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn" id="detailConfigBtn">查看配置</button>
+        <button class="btn primary" id="closeDetailModalFootBtn">关闭</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const tenantMark = "tenant_clean";
+    const models = [
+      ["electric_meter", "电表"],
+      ["water_meter", "水表"],
+      ["gas_meter", "燃气表"],
+      ["steam_meter", "蒸汽表"]
+    ];
+
+    const points = [
+      ["electric_meter", "em_001", "kwh_total", "一号车间总电量", "kWh"],
+      ["electric_meter", "em_001", "p_total", "一号车间总功率", "kW"],
+      ["electric_meter", "em_001", "voltage_a", "一号车间 A 相电压", "V"],
+      ["electric_meter", "em_002", "kwh_total", "二号车间总电量", "kWh"],
+      ["electric_meter", "em_002", "p_total", "二号车间总功率", "kW"],
+      ["electric_meter", "em_line_a", "kwh_total", "A 产线总电量", "kWh"],
+      ["electric_meter", "em_line_a", "p_total", "A 产线总功率", "kW"],
+      ["electric_meter", "em_line_b", "kwh_total", "B 产线总电量", "kWh"],
+      ["electric_meter", "em_line_b", "p_total", "B 产线总功率", "kW"],
+      ["water_meter", "wm_001", "flow_total", "一号车间用水量", "m3"],
+      ["water_meter", "wm_001", "flow_rate", "一号车间瞬时流量", "m3/h"],
+      ["water_meter", "wm_002", "flow_total", "二号车间用水量", "m3"],
+      ["water_meter", "wm_002", "flow_rate", "二号车间瞬时流量", "m3/h"],
+      ["water_meter", "wm_cooling", "flow_total", "冷却水总量", "m3"],
+      ["gas_meter", "gm_001", "flow_total", "锅炉房用气量", "Nm3"],
+      ["gas_meter", "gm_001", "flow_rate", "锅炉房瞬时用气", "Nm3/h"],
+      ["gas_meter", "gm_002", "flow_total", "食堂用气量", "Nm3"],
+      ["gas_meter", "gm_002", "pressure", "食堂燃气压力", "kPa"],
+      ["steam_meter", "stm_001", "flow_total", "蒸汽主管累计量", "t"],
+      ["steam_meter", "stm_001", "flow_rate", "蒸汽主管瞬时量", "t/h"],
+      ["steam_meter", "stm_002", "flow_total", "固化线蒸汽累计量", "t"],
+      ["steam_meter", "stm_002", "temperature", "固化线蒸汽温度", "C"],
+      ["steam_meter", "stm_003", "flow_total", "清洗线蒸汽累计量", "t"],
+      ["steam_meter", "stm_003", "pressure", "清洗线蒸汽压力", "MPa"]
+    ].map(([modelMark, deviceMark, paramMark, pointName, unit]) => ({
+      tenantMark,
+      modelMark,
+      deviceMark,
+      paramMark,
+      pointName,
+      unit
+    }));
+
+    let rules = [
+      { tenantMark, modelMark: "electric_meter", deviceMark: "em_001", paramMark: "kwh_total", transformFormula: "x", minValue: "0", maxValue: "999999", maxDelta: "5000", cumulative: true, rolloverEnabled: true, rolloverMaxValue: "999999", rolloverMinPreviousValue: "990000", rolloverMaxCurrentValue: "1000", enabled: true },
+      { tenantMark, modelMark: "electric_meter", deviceMark: "em_001", paramMark: "p_total", transformFormula: "x", minValue: "0", maxValue: "2000", maxDelta: "500", cumulative: false, rolloverEnabled: false, rolloverMaxValue: "", rolloverMinPreviousValue: "", rolloverMaxCurrentValue: "", enabled: true },
+      { tenantMark, modelMark: "electric_meter", deviceMark: "em_002", paramMark: "kwh_total", transformFormula: "x", minValue: "0", maxValue: "800000", maxDelta: "4500", cumulative: true, rolloverEnabled: true, rolloverMaxValue: "999999", rolloverMinPreviousValue: "990000", rolloverMaxCurrentValue: "1000", enabled: true },
+      { tenantMark, modelMark: "water_meter", deviceMark: "wm_001", paramMark: "flow_total", transformFormula: "x", minValue: "0", maxValue: "500000", maxDelta: "300", cumulative: true, rolloverEnabled: false, rolloverMaxValue: "", rolloverMinPreviousValue: "", rolloverMaxCurrentValue: "", enabled: true },
+      { tenantMark, modelMark: "gas_meter", deviceMark: "gm_001", paramMark: "flow_total", transformFormula: "x * 1.02", minValue: "0", maxValue: "300000", maxDelta: "260", cumulative: true, rolloverEnabled: false, rolloverMaxValue: "", rolloverMinPreviousValue: "", rolloverMaxCurrentValue: "", enabled: false }
+    ];
+
+    const selected = new Set();
+    let pageNo = 1;
+    let detailPageNo = 1;
+    let detailRecordPageNo = 1;
+    let detailOnlyAbnormal = false;
+    let modalTargets = [];
+    let activeDetailPointKey = "";
+    let activeDetailDefaultStartTime = "";
+    let activeDetailDefaultEndTime = "";
+    const selectedDetailRules = new Set();
+    const formulaPattern = /^[xX0-9+\-*/().\s]+$/;
+    const maxQueryRangeDays = 7;
+    const maxQueryRangeMs = maxQueryRangeDays * 24 * 60 * 60 * 1000;
+    const qualityMeta = {
+      0: { label: "正常", className: "green", rule: "正常入库" },
+      1: { label: "格式异常", className: "red", rule: "格式解析" },
+      2: { label: "时间异常", className: "red", rule: "设备时间" },
+      4: { label: "重复数据", className: "amber", rule: "重复判定" },
+      5: { label: "乱序数据", className: "amber", rule: "时序判定" },
+      6: { label: "量程越限", className: "red", rule: "上下限" },
+      7: { label: "突变异常", className: "red", rule: "最大变化量" },
+      8: { label: "累计倒退", className: "red", rule: "累计量" },
+      9: { label: "公式异常", className: "red", rule: "转换公式" },
+      10: { label: "合法回零", className: "blue", rule: "合法回零" }
+    };
+    const cleanRuleLabels = {
+      NORMAL: "正常",
+      FORMAT_ERROR: "格式解析",
+      TIME_ERROR: "设备时间",
+      DUPLICATE: "重复判定",
+      OUT_OF_ORDER: "时序判定",
+      OUT_OF_RANGE: "上下限",
+      SPIKE: "最大变化量",
+      CUMULATIVE_ROLLBACK: "累计量",
+      FORMULA_ERROR: "转换公式",
+      ROLLOVER: "合法回零"
+    };
+    const detailRuleOptions = [
+      ["NORMAL", "正常"],
+      ["FORMAT_ERROR", "格式异常"],
+      ["TIME_ERROR", "时间异常"],
+      ["DUPLICATE", "重复数据"],
+      ["OUT_OF_ORDER", "乱序数据"],
+      ["OUT_OF_RANGE", "量程越限"],
+      ["SPIKE", "突变异常"],
+      ["CUMULATIVE_ROLLBACK", "累计倒退"],
+      ["FORMULA_ERROR", "公式异常"],
+      ["ROLLOVER", "合法回零"]
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const keyOf = (row) => [row.tenantMark, row.modelMark, row.deviceMark, row.paramMark].join("|");
+
+    const cleanRecords = [
+      record("001", "electric_meter", "em_001", "kwh_total", "82410", "82410", "2026-05-27 09:00:00", 0, true, "NORMAL", ""),
+      record("002", "electric_meter", "em_001", "p_total", "386.4", "386.4", "2026-05-27 09:00:00", 0, true, "NORMAL", ""),
+      record("003", "electric_meter", "em_001", "voltage_a", "226.1", "", "2026-05-27 09:00:00", 4, false, "DUPLICATE", "raw_202605270858_003"),
+      record("004", "electric_meter", "em_002", "kwh_total", "999.6", "999.6", "2026-05-27 09:01:00", 10, true, "ROLLOVER", ""),
+      record("005", "electric_meter", "em_002", "p_total", "2510", "", "2026-05-27 09:01:00", 6, false, "OUT_OF_RANGE", ""),
+      record("006", "electric_meter", "em_line_a", "kwh_total", "43882", "43882", "2026-05-27 09:02:00", 0, true, "NORMAL", ""),
+      record("007", "electric_meter", "em_line_a", "p_total", "914.6", "", "2026-05-27 09:02:00", 7, false, "SPIKE", ""),
+      record("008", "water_meter", "wm_001", "flow_total", "352100", "352100", "2026-05-27 09:03:00", 0, true, "NORMAL", ""),
+      record("009", "water_meter", "wm_001", "flow_rate", "bad", "", "2026-05-27 09:03:00", 1, false, "FORMAT_ERROR", ""),
+      record("010", "water_meter", "wm_002", "flow_total", "318500", "", "1999-12-31 23:59:59", 2, false, "TIME_ERROR", ""),
+      record("011", "gas_meter", "gm_001", "flow_total", "168520", "171890.4", "2026-05-27 09:04:00", 0, true, "NORMAL", ""),
+      record("012", "gas_meter", "gm_002", "pressure", "48.6", "48.6", "2026-05-27 09:04:00", 0, true, "NORMAL", ""),
+      record("013", "steam_meter", "stm_001", "flow_total", "92110", "", "2026-05-27 09:05:00", 8, false, "CUMULATIVE_ROLLBACK", ""),
+      record("014", "steam_meter", "stm_002", "temperature", "174.3", "174.3", "2026-05-27 09:05:00", 0, true, "NORMAL", ""),
+      record("015", "steam_meter", "stm_003", "pressure", "0.78", "0.78", "2026-05-27 09:06:00", 0, true, "NORMAL", ""),
+      record("016", "gas_meter", "gm_001", "flow_total", "168780", "", "2026-05-27 09:06:00", 9, false, "FORMULA_ERROR", ""),
+      record("017", "electric_meter", "em_001", "voltage_a", "225.8", "225.8", "2026-05-27 09:01:00", 0, true, "NORMAL", ""),
+      record("018", "electric_meter", "em_001", "voltage_a", "226.4", "226.4", "2026-05-27 09:02:00", 0, true, "NORMAL", ""),
+      record("019", "electric_meter", "em_001", "voltage_a", "bad", "", "2026-05-27 09:03:00", 1, false, "FORMAT_ERROR", ""),
+      record("020", "electric_meter", "em_001", "voltage_a", "229.0", "229.0", "2026-05-27 09:04:00", 0, true, "NORMAL", ""),
+      record("021", "electric_meter", "em_001", "voltage_a", "410.0", "", "2026-05-27 09:05:00", 6, false, "OUT_OF_RANGE", ""),
+      record("022", "electric_meter", "em_001", "voltage_a", "227.2", "227.2", "2026-05-27 09:06:00", 0, true, "NORMAL", "")
+    ];
+
+    function pointBy(modelMark, deviceMark, paramMark) {
+      return points.find((point) => point.modelMark === modelMark && point.deviceMark === deviceMark && point.paramMark === paramMark);
+    }
+
+    function record(seq, modelMark, deviceMark, paramMark, rawValue, cleanValue, deviceTime, qualityCode, effective, cleanRule, duplicateOfId) {
+      const point = pointBy(modelMark, deviceMark, paramMark) || { tenantMark, modelMark, deviceMark, paramMark, pointName: paramMark, unit: "" };
+      const timeKey = deviceTime.replace(/\D/g, "").slice(0, 14);
+      return {
+        id: `clean_${timeKey}_${seq}`,
+        cleanTable: "clean_point_record_202605",
+        rawId: `raw_${timeKey}_${seq}`,
+        messageId: `msg_${timeKey}_${seq}`,
+        protocolVersion: "unified-v1",
+        tenantMark,
+        modelMark,
+        deviceMark,
+        paramMark,
+        pointName: point.pointName,
+        unit: point.unit,
+        rawValue,
+        cleanValue,
+        deviceTime,
+        receiveTime: deviceTime,
+        normalSecond: Math.floor(new Date(deviceTime.replace(" ", "T")).getTime() / 1000),
+        qualityCode,
+        effective,
+        duplicateOfId,
+        cleanRule,
+        createdTime: deviceTime
+      };
+    }
+
+    function findRule(point) {
+      return rules.find((rule) => keyOf(rule) === keyOf(point));
+    }
+
+    function defaultRule(point) {
+      return {
+        ...point,
+        transformFormula: "x",
+        minValue: "",
+        maxValue: "",
+        maxDelta: "",
+        cumulative: false,
+        rolloverEnabled: false,
+        rolloverMaxValue: "",
+        rolloverMinPreviousValue: "",
+        rolloverMaxCurrentValue: "",
+        enabled: true
+      };
+    }
+
+    function toast(text, type = "info") {
+      const toastEl = $("toast");
+      toastEl.textContent = text;
+      toastEl.className = `toast show ${type}`;
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => {
+        toastEl.className = "toast";
+      }, 1800);
+    }
+
+    function fillModels() {
+      ["modelFilter", "detailModelFilter"].forEach((selectId) => {
+        const select = $(selectId);
+        if (!select) return;
+        models.forEach(([modelMark, modelName]) => {
+          const option = document.createElement("option");
+          option.value = modelMark;
+          option.textContent = `${modelName} / ${modelMark}`;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    function enhanceFilterSelects() {
+      ["modelFilter", "statusFilter", "cumulativeFilter", "detailModelFilter", "detailQualityFilter"].forEach((id) => enhanceSelect($(id)));
+      document.addEventListener("click", () => closeCustomSelects());
+    }
+
+    function enhanceSelect(select) {
+      if (!select || select.dataset.enhanced === "true") return;
+      select.dataset.enhanced = "true";
+      select.classList.add("native-select");
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "custom-select";
+      wrapper.dataset.for = select.id;
+
+      const trigger = document.createElement("button");
+      trigger.type = "button";
+      trigger.className = "custom-select-trigger";
+
+      const menu = document.createElement("div");
+      menu.className = "custom-select-menu";
+
+      wrapper.append(trigger, menu);
+      select.insertAdjacentElement("afterend", wrapper);
+
+      const render = () => {
+        const selectedOption = select.options[select.selectedIndex];
+        trigger.textContent = selectedOption ? selectedOption.textContent : "";
+        menu.innerHTML = "";
+        Array.from(select.options).forEach((option) => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = `custom-select-option${option.value === select.value ? " selected" : ""}`;
+          item.textContent = option.textContent;
+          item.addEventListener("click", (event) => {
+            event.stopPropagation();
+            select.value = option.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            closeCustomSelects();
+          });
+          menu.appendChild(item);
+        });
+      };
+
+      select.customRefresh = render;
+      trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const shouldOpen = !wrapper.classList.contains("open");
+        closeCustomSelects(wrapper);
+        wrapper.classList.toggle("open", shouldOpen);
+      });
+      select.addEventListener("change", render);
+      render();
+    }
+
+    function closeCustomSelects(except) {
+      document.querySelectorAll(".custom-select.open").forEach((select) => {
+        if (select !== except) select.classList.remove("open");
+      });
+    }
+
+    function refreshCustomSelects() {
+      ["modelFilter", "statusFilter", "cumulativeFilter", "detailModelFilter", "detailQualityFilter"].forEach((id) => {
+        const select = $(id);
+        if (select && select.customRefresh) select.customRefresh();
+      });
+    }
+
+    function filteredPoints() {
+      const model = $("modelFilter").value;
+      const device = $("deviceFilter").value.trim().toLowerCase();
+      const param = $("paramFilter").value.trim().toLowerCase();
+      const name = $("nameFilter").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+      const cumulative = $("cumulativeFilter").value;
+      return points.filter((point) => {
+        const rule = findRule(point);
+        if (model && point.modelMark !== model) return false;
+        if (device && !point.deviceMark.toLowerCase().includes(device)) return false;
+        if (param && !point.paramMark.toLowerCase().includes(param)) return false;
+        if (name && !point.pointName.toLowerCase().includes(name)) return false;
+        if (status === "unconfigured" && rule) return false;
+        if (status === "true" && !(rule && rule.enabled)) return false;
+        if (status === "false" && !(rule && !rule.enabled)) return false;
+        if (cumulative === "true" && !(rule && rule.cumulative)) return false;
+        if (cumulative === "false" && rule && rule.cumulative) return false;
+        return true;
+      });
+    }
+
+    function pagedPoints(list) {
+      const size = Number($("pageSize").value);
+      const pageCount = Math.max(1, Math.ceil(list.length / size));
+      if (pageNo > pageCount) pageNo = pageCount;
+      const start = (pageNo - 1) * size;
+      return list.slice(start, start + size);
+    }
+
+    function statusBadge(rule) {
+      if (!rule) return '<span class="badge amber">未配置</span>';
+      return rule.enabled ? '<span class="badge green">启用</span>' : '<span class="badge red">停用</span>';
+    }
+
+    function renderPager(list) {
+      const size = Number($("pageSize").value);
+      const pageCount = Math.max(1, Math.ceil(list.length / size));
+      $("pagerTotal").textContent = `共 ${list.length} 条`;
+      $("pageList").innerHTML = "";
+      for (let page = 1; page <= pageCount; page += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `page-btn${page === pageNo ? " active" : ""}`;
+        button.textContent = page;
+        button.addEventListener("click", () => {
+          pageNo = page;
+          renderTable();
+        });
+        $("pageList").appendChild(button);
+      }
+      $("prevPageBtn").disabled = pageNo <= 1;
+      $("nextPageBtn").disabled = pageNo >= pageCount;
+    }
+
+    function renderCheckAll(pageRows) {
+      const checkbox = $("checkAll");
+      checkbox.checked = pageRows.length > 0 && pageRows.every((point) => selected.has(keyOf(point)));
+      checkbox.indeterminate = pageRows.some((point) => selected.has(keyOf(point))) && !checkbox.checked;
+    }
+
+    function renderTable() {
+      const list = filteredPoints();
+      const rows = pagedPoints(list);
+      const body = $("tableBody");
+      body.innerHTML = "";
+      rows.forEach((point) => {
+        const rule = findRule(point);
+        const rowKey = keyOf(point);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="checkbox" ${selected.has(rowKey) ? "checked" : ""}></td>
+          <td title="${point.pointName}">
+            <div class="point-name">${point.pointName}</div>
+          </td>
+          <td><code>${point.unit}</code></td>
+          <td><code>${point.modelMark}</code></td>
+          <td><code>${point.deviceMark}</code></td>
+          <td><code>${point.paramMark}</code></td>
+          <td>${rule ? `<code>${rule.transformFormula || "x"}</code>` : "-"}</td>
+          <td>${rule ? `${rule.minValue || "-"} ~ ${rule.maxValue || "-"}` : "-"}</td>
+          <td>${rule && rule.maxDelta ? `<code>${rule.maxDelta}</code>` : "-"}</td>
+          <td>${rule && rule.cumulative ? '<span class="badge blue">是</span>' : '<span class="badge">否</span>'}</td>
+          <td>${rule && rule.rolloverEnabled ? '<span class="badge green">开启</span>' : '<span class="badge">关闭</span>'}</td>
+          <td>${statusBadge(rule)}</td>
+          <td>
+            <button class="btn link" data-action="edit">配置</button>
+            <button class="btn link" data-action="disable">${rule && rule.enabled ? "停用" : "启用"}</button>
+          </td>
+        `;
+        tr.querySelector("input").addEventListener("change", (event) => {
+          if (event.target.checked) selected.add(rowKey);
+          else selected.delete(rowKey);
+          renderTable();
+        });
+        tr.querySelector('[data-action="edit"]').addEventListener("click", () => openModal([point], "单点配置"));
+        tr.querySelector('[data-action="disable"]').addEventListener("click", () => toggleRule(point, rule));
+        body.appendChild(tr);
+      });
+      renderCheckAll(rows);
+      renderPager(list);
+    }
+
+    function switchPage(page) {
+      document.querySelectorAll(".page-view").forEach((view) => view.classList.remove("active"));
+      document.querySelectorAll(".side-item[data-page]").forEach((item) => item.classList.toggle("active", item.dataset.page === page));
+      const target = page === "detail" ? $("detailPage") : $("configPage");
+      target.classList.add("active");
+      closeCustomSelects();
+      if (page === "detail") renderDetailTable();
+      else renderTable();
+    }
+
+    function cleanRuleLabel(record) {
+      return cleanRuleLabels[record.cleanRule] || record.cleanRule || "-";
+    }
+
+    function recordIsAbnormal(record) {
+      return !record.effective || ![0, 10].includes(record.qualityCode);
+    }
+
+    function recordStatusBadge(record) {
+      return recordIsAbnormal(record) ? '<span class="badge red">异常</span>' : '<span class="badge green">正常</span>';
+    }
+
+    function summaryStatusBadge(summary) {
+      return summary.abnormalCount > 0 ? '<span class="badge red">异常</span>' : '<span class="badge green">正常</span>';
+    }
+
+    function qualityText(record) {
+      const meta = qualityMeta[record.qualityCode] || { label: `未知 ${record.qualityCode}` };
+      return meta.label;
+    }
+
+    function renderDetailRuleFilter() {
+      const menu = $("detailRuleMenu");
+      menu.innerHTML = "";
+      detailRuleOptions.forEach(([value, label]) => {
+        const option = document.createElement("label");
+        option.className = "rule-option";
+        option.innerHTML = `<input type="checkbox" value="${value}" ${selectedDetailRules.has(value) ? "checked" : ""}>${label}`;
+        option.querySelector("input").addEventListener("change", (event) => {
+          if (event.target.checked) selectedDetailRules.add(value);
+          else selectedDetailRules.delete(value);
+          updateDetailRuleTrigger();
+        });
+        menu.appendChild(option);
+      });
+      updateDetailRuleTrigger();
+    }
+
+    function updateDetailRuleTrigger() {
+      const selectedLabels = detailRuleOptions
+        .filter(([value]) => selectedDetailRules.has(value))
+        .map(([, label]) => label);
+      $("detailRuleTrigger").textContent = selectedLabels.length ? selectedLabels.join("、") : "全部";
+    }
+
+    function parseTimeFilter(value, endOfDay) {
+      const input = value.trim();
+      if (!input) return null;
+      const normalized = input.length === 10 ? `${input} ${endOfDay ? "23:59:59" : "00:00:00"}` : input;
+      const parsed = new Date(normalized.replace(" ", "T")).getTime();
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    function validateTimeRange(startId, endId) {
+      const startInput = $(startId);
+      const endInput = $(endId);
+      const startTime = parseTimeFilter(startInput.value, false);
+      const endTime = parseTimeFilter(endInput.value, true);
+      startInput.classList.remove("field-invalid");
+      endInput.classList.remove("field-invalid");
+      if (startInput.value && startTime === null) {
+        startInput.classList.add("field-invalid");
+        toast("请选择有效的开始时间", "warn");
+        return false;
+      }
+      if (endInput.value && endTime === null) {
+        endInput.classList.add("field-invalid");
+        toast("请选择有效的结束时间", "warn");
+        return false;
+      }
+      if (startTime && endTime && endTime < startTime) {
+        startInput.classList.add("field-invalid");
+        endInput.classList.add("field-invalid");
+        toast("结束时间不能早于开始时间", "warn");
+        return false;
+      }
+      if (startTime && endTime && endTime - startTime > maxQueryRangeMs) {
+        startInput.classList.add("field-invalid");
+        endInput.classList.add("field-invalid");
+        toast(`查询时间范围不能超过 ${maxQueryRangeDays} 天`, "warn");
+        return false;
+      }
+      return true;
+    }
+
+    function recordTimeValue(record) {
+      return new Date(record.deviceTime.replace(" ", "T")).getTime();
+    }
+
+    function recordsInTimeRange(startId, endId) {
+      const startTime = parseTimeFilter($(startId).value, false);
+      const endTime = parseTimeFilter($(endId).value, true);
+      return cleanRecords.filter((recordItem) => {
+        const recordTime = recordTimeValue(recordItem);
+        if (startTime && recordTime < startTime) return false;
+        if (endTime && recordTime > endTime) return false;
+        return true;
+      });
+    }
+
+    function recordsInSelectedTimeRange() {
+      return recordsInTimeRange("detailStartTime", "detailEndTime");
+    }
+
+    function filteredPointSummaries() {
+      const model = $("detailModelFilter").value;
+      const device = $("detailDeviceFilter").value.trim().toLowerCase();
+      const param = $("detailParamFilter").value.trim().toLowerCase();
+      const name = $("detailNameFilter").value.trim().toLowerCase();
+      const quality = $("detailQualityFilter").value;
+      const recordsByPoint = new Map();
+      recordsInSelectedTimeRange().forEach((recordItem) => {
+        const recordKey = keyOf(recordItem);
+        if (!recordsByPoint.has(recordKey)) recordsByPoint.set(recordKey, []);
+        recordsByPoint.get(recordKey).push(recordItem);
+      });
+
+      return points.map((point) => {
+        const records = recordsByPoint.get(keyOf(point)) || [];
+        const abnormalCount = records.filter(recordIsAbnormal).length;
+        const normalCount = records.length - abnormalCount;
+        const latest = records.reduce((last, item) => (recordTimeValue(item) > recordTimeValue(last) ? item : last), records[0]);
+        return {
+          ...point,
+          totalCount: records.length,
+          normalCount,
+          abnormalCount,
+          latestTime: latest ? latest.deviceTime : "-"
+        };
+      }).filter((summary) => {
+        if (summary.totalCount === 0) return false;
+        if (model && summary.modelMark !== model) return false;
+        if (device && !summary.deviceMark.toLowerCase().includes(device)) return false;
+        if (param && !summary.paramMark.toLowerCase().includes(param)) return false;
+        if (name && !summary.pointName.toLowerCase().includes(name)) return false;
+        if (quality === "normal" && summary.abnormalCount > 0) return false;
+        if (quality === "abnormal" && summary.abnormalCount === 0) return false;
+        if (detailOnlyAbnormal && summary.abnormalCount === 0) return false;
+        return true;
+      });
+    }
+
+    function pagedPointSummaries(list) {
+      const size = Number($("detailPageSize").value);
+      const pageCount = Math.max(1, Math.ceil(list.length / size));
+      if (detailPageNo > pageCount) detailPageNo = pageCount;
+      const start = (detailPageNo - 1) * size;
+      return list.slice(start, start + size);
+    }
+
+    function renderDetailPager(list) {
+      const size = Number($("detailPageSize").value);
+      const pageCount = Math.max(1, Math.ceil(list.length / size));
+      $("detailPagerTotal").textContent = `共 ${list.length} 个点位`;
+      $("detailPageList").innerHTML = "";
+      for (let page = 1; page <= pageCount; page += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `page-btn${page === detailPageNo ? " active" : ""}`;
+        button.textContent = page;
+        button.addEventListener("click", () => {
+          detailPageNo = page;
+          renderDetailTable();
+        });
+        $("detailPageList").appendChild(button);
+      }
+      $("detailPrevPageBtn").disabled = detailPageNo <= 1;
+      $("detailNextPageBtn").disabled = detailPageNo >= pageCount;
+    }
+
+    function renderDetailTable() {
+      const list = filteredPointSummaries();
+      const rows = pagedPointSummaries(list);
+      const body = $("detailTableBody");
+      body.innerHTML = "";
+      $("abnormalOnlyBtn").classList.toggle("primary", detailOnlyAbnormal);
+      $("abnormalOnlyBtn").textContent = detailOnlyAbnormal ? "查看全部" : "只看异常";
+      rows.forEach((summary) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td title="${summary.pointName}"><div class="point-name">${summary.pointName}</div></td>
+          <td><code>${summary.unit || "-"}</code></td>
+          <td><code>${summary.modelMark}</code></td>
+          <td><code>${summary.deviceMark}</code></td>
+          <td><code>${summary.paramMark}</code></td>
+          <td><span class="metric">${summary.totalCount}</span></td>
+          <td><span class="metric">${summary.normalCount}</span></td>
+          <td><span class="metric">${summary.abnormalCount}</span></td>
+          <td>${summary.latestTime}</td>
+          <td>${summaryStatusBadge(summary)}</td>
+          <td><button class="btn link" data-action="detail">详情</button></td>
+        `;
+        tr.querySelector('[data-action="detail"]').addEventListener("click", () => openCleanDetail(keyOf(summary)));
+        body.appendChild(tr);
+      });
+      renderDetailPager(list);
+    }
+
+    function recordsForPoint(pointKey, startId = "detailStartTime", endId = "detailEndTime") {
+      return recordsInTimeRange(startId, endId)
+        .filter((recordItem) => keyOf(recordItem) === pointKey)
+        .filter((recordItem) => selectedDetailRules.size === 0 || selectedDetailRules.has(recordItem.cleanRule))
+        .sort((a, b) => recordTimeValue(a) - recordTimeValue(b));
+    }
+
+    function openCleanDetail(pointKey) {
+      const point = points.find((item) => keyOf(item) === pointKey) || recordsForPoint(pointKey)[0];
+      if (!point) return;
+      activeDetailPointKey = pointKey;
+      activeDetailDefaultStartTime = $("detailStartTime").value;
+      activeDetailDefaultEndTime = $("detailEndTime").value;
+      $("detailModalStartTime").value = activeDetailDefaultStartTime;
+      $("detailModalEndTime").value = activeDetailDefaultEndTime;
+      selectedDetailRules.clear();
+      renderDetailRuleFilter();
+      detailRecordPageNo = 1;
+      renderCleanDetailModal();
+      $("cleanDetailModal").classList.add("open");
+      $("cleanDetailModal").setAttribute("aria-hidden", "false");
+    }
+
+    function pagedDetailRecords(records) {
+      const size = Number($("detailRecordPageSize").value);
+      const pageCount = Math.max(1, Math.ceil(records.length / size));
+      if (detailRecordPageNo > pageCount) detailRecordPageNo = pageCount;
+      const start = (detailRecordPageNo - 1) * size;
+      return records.slice(start, start + size);
+    }
+
+    function renderDetailRecordPager(records) {
+      const size = Number($("detailRecordPageSize").value);
+      const pageCount = Math.max(1, Math.ceil(records.length / size));
+      $("detailRecordPagerTotal").textContent = `共 ${records.length} 条`;
+      $("detailRecordPageList").innerHTML = "";
+      for (let page = 1; page <= pageCount; page += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `page-btn${page === detailRecordPageNo ? " active" : ""}`;
+        button.textContent = page;
+        button.addEventListener("click", () => {
+          detailRecordPageNo = page;
+          renderCleanDetailModal();
+        });
+        $("detailRecordPageList").appendChild(button);
+      }
+      $("detailRecordPrevPageBtn").disabled = detailRecordPageNo <= 1;
+      $("detailRecordNextPageBtn").disabled = detailRecordPageNo >= pageCount;
+    }
+
+    function renderCleanDetailModal() {
+      const point = points.find((item) => keyOf(item) === activeDetailPointKey);
+      const records = recordsForPoint(activeDetailPointKey, "detailModalStartTime", "detailModalEndTime");
+      const rows = pagedDetailRecords(records);
+      $("detailRecordFields").innerHTML = rows.length ? rows.map((recordItem) => `
+        <tr>
+          <td>${recordItem.deviceTime}</td>
+          <td>${recordItem.receiveTime}</td>
+          <td><span class="metric">${recordItem.rawValue || "-"}</span></td>
+          <td><span class="metric">${recordItem.cleanValue || "-"}</span></td>
+          <td>${recordStatusBadge(recordItem)}</td>
+          <td>${qualityText(recordItem)}</td>
+          <td>${recordItem.effective ? '<span class="badge green">是</span>' : '<span class="badge red">否</span>'}</td>
+          <td><code>${recordItem.rawId}</code></td>
+        </tr>
+      `).join("") : '<tr><td colspan="8">当前时间范围内没有数据</td></tr>';
+      renderDetailRecordPager(records);
+    }
+
+    function closeCleanDetail() {
+      activeDetailPointKey = "";
+      $("cleanDetailModal").classList.remove("open");
+      $("cleanDetailModal").setAttribute("aria-hidden", "true");
+    }
+
+    function jumpToConfig(point) {
+      closeCleanDetail();
+      $("modelFilter").value = point.modelMark;
+      $("deviceFilter").value = point.deviceMark;
+      $("paramFilter").value = point.paramMark;
+      $("nameFilter").value = "";
+      $("statusFilter").value = "";
+      $("cumulativeFilter").value = "";
+      refreshCustomSelects();
+      pageNo = 1;
+      switchPage("config");
+      toast("已定位到该测点的清洗配置", "info");
+    }
+
+    function resetDetailFilters() {
+      $("detailModelFilter").value = "";
+      $("detailDeviceFilter").value = "";
+      $("detailParamFilter").value = "";
+      $("detailNameFilter").value = "";
+      $("detailQualityFilter").value = "";
+      $("detailStartTime").value = "";
+      $("detailEndTime").value = "";
+      $("detailStartTime").classList.remove("field-invalid");
+      $("detailEndTime").classList.remove("field-invalid");
+      detailOnlyAbnormal = false;
+      refreshCustomSelects();
+      detailPageNo = 1;
+      renderDetailTable();
+    }
+
+    function validateDetailTime(id) {
+      return validateTimeRange("detailStartTime", "detailEndTime");
+    }
+
+    function applyDetailFilters() {
+      if (!validateTimeRange("detailStartTime", "detailEndTime")) return;
+      detailPageNo = 1;
+      renderDetailTable();
+    }
+
+    function applyDetailModalFilters() {
+      if (!validateTimeRange("detailModalStartTime", "detailModalEndTime")) return;
+      detailRecordPageNo = 1;
+      renderCleanDetailModal();
+    }
+
+    function resetDetailModalFilters() {
+      $("detailModalStartTime").value = activeDetailDefaultStartTime;
+      $("detailModalEndTime").value = activeDetailDefaultEndTime;
+      $("detailModalStartTime").classList.remove("field-invalid");
+      $("detailModalEndTime").classList.remove("field-invalid");
+      selectedDetailRules.clear();
+      renderDetailRuleFilter();
+      detailRecordPageNo = 1;
+      renderCleanDetailModal();
+    }
+
+    function validateDetailModalTime() {
+      return validateTimeRange("detailModalStartTime", "detailModalEndTime");
+    }
+
+    function setForm(rule) {
+      ["minValue", "maxValue", "maxDelta", "rolloverMaxValue", "rolloverMinPreviousValue", "rolloverMaxCurrentValue"].forEach((field) => {
+        $(field).value = rule[field] || "";
+      });
+      setFormulaValue(rule.transformFormula || "x", true);
+      $("cumulative").checked = Boolean(rule.cumulative);
+      $("rolloverEnabled").checked = Boolean(rule.rolloverEnabled);
+      validateFormula(true);
+    }
+
+    function formValue() {
+      return {
+        tenantMark,
+        transformFormula: $("transformFormula").value.trim() || "x",
+        minValue: $("minValue").value.trim(),
+        maxValue: $("maxValue").value.trim(),
+        maxDelta: $("maxDelta").value.trim(),
+        cumulative: $("cumulative").checked,
+        rolloverEnabled: $("rolloverEnabled").checked,
+        rolloverMaxValue: $("rolloverMaxValue").value.trim(),
+        rolloverMinPreviousValue: $("rolloverMinPreviousValue").value.trim(),
+        rolloverMaxCurrentValue: $("rolloverMaxCurrentValue").value.trim()
+      };
+    }
+
+    function openModal(targets, title) {
+      modalTargets = targets;
+      const seed = targets.length === 1 ? (findRule(targets[0]) || defaultRule(targets[0])) : defaultRule(targets[0]);
+      $("modalTitle").textContent = title;
+      setForm(seed);
+      $("ruleModal").classList.add("open");
+      $("ruleModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+      $("ruleModal").classList.remove("open");
+      $("ruleModal").setAttribute("aria-hidden", "true");
+    }
+
+    function validateFormula(silent) {
+      const input = $("transformFormula");
+      const error = $("formulaError");
+      const builder = document.querySelector(".formula-builder");
+      const validity = $("formulaValidity");
+      const formula = input.value.trim();
+      const valid = isFormulaValid(formula);
+      builder.classList.toggle("field-invalid", !valid);
+      validity.textContent = valid ? "合法" : "不合法";
+      validity.className = `formula-validity ${valid ? "ok" : "bad"}`;
+      error.classList.toggle("show", !valid && !silent);
+      return valid;
+    }
+
+    function setFormulaValue(value, silent = true) {
+      $("transformFormula").value = value || "";
+      renderFormulaDisplay();
+      validateFormula(silent);
+    }
+
+    function renderFormulaDisplay() {
+      const display = $("formulaDisplay");
+      const value = $("transformFormula").value.trim();
+      display.textContent = value || "x";
+      display.classList.toggle("empty", !value);
+    }
+
+    function appendFormulaToken(token) {
+      const current = $("transformFormula").value;
+      const next = nextFormulaValue(current, token);
+      if (next === current) {
+        toast("当前位置不能插入该符号", "warn");
+        return;
+      }
+      setFormulaValue(next, false);
+    }
+
+    function nextFormulaValue(current, token) {
+      const value = current.trimEnd();
+      const previous = lastFormulaChar(value);
+      const isOperator = ["+", "-", "*", "/"].includes(token);
+      if (!value) {
+        if (["*", "/", ")"].includes(token)) return current;
+        return token;
+      }
+      if (token === "x") {
+        if (!previous || ["+", "-", "*", "/", "("].includes(previous)) return appendCompact(current, token);
+        return current;
+      }
+      if (/^\d$/.test(token)) {
+        if (previous === "x" || previous === ")") return current;
+        return appendCompact(current, token);
+      }
+      if (token === ".") {
+        if (previous === "x" || previous === ")") return current;
+        const number = currentNumber(value);
+        if (number.includes(".")) return current;
+        return appendCompact(current, token);
+      }
+      if (token === "(") {
+        if (previous && !["+", "-", "*", "/", "("].includes(previous)) return current;
+        return appendCompact(current, token);
+      }
+      if (token === ")") {
+        if (!hasUnclosedParenthesis(value) || !/[xX0-9)]/.test(previous)) return current;
+        return appendCompact(current, token);
+      }
+      if (isOperator) {
+        if (["+", "-"].includes(token) && ["+", "-", "*", "/", "("].includes(previous)) {
+          return appendWithSpaces(value, token);
+        }
+        if (!/[xX0-9)]/.test(previous)) return current;
+        return appendWithSpaces(value, token);
+      }
+      return current;
+    }
+
+    function appendCompact(value, token) {
+      return value.endsWith(" ") ? value + token : value + token;
+    }
+
+    function appendWithSpaces(value, token) {
+      return `${value} ${token} `;
+    }
+
+    function lastFormulaChar(value) {
+      const compact = value.replace(/\s+$/g, "");
+      return compact ? compact[compact.length - 1] : "";
+    }
+
+    function currentNumber(value) {
+      const match = value.match(/[0-9.]+$/);
+      return match ? match[0] : "";
+    }
+
+    function hasUnclosedParenthesis(value) {
+      const open = (value.match(/\(/g) || []).length;
+      const close = (value.match(/\)/g) || []).length;
+      return open > close;
+    }
+
+    function backspaceFormula() {
+      const value = $("transformFormula").value.trimEnd();
+      if (!value) return;
+      setFormulaValue(value.slice(0, -1).trimEnd(), false);
+    }
+
+    function isFormulaValid(formula) {
+      if (!formula) return true;
+      if (!formulaPattern.test(formula)) return false;
+      let position = 0;
+      const skipWhitespace = () => {
+        while (position < formula.length && /\s/.test(formula[position])) position += 1;
+      };
+      const match = (char) => {
+        skipWhitespace();
+        if (formula[position] === char) {
+          position += 1;
+          return true;
+        }
+        return false;
+      };
+      const parseNumber = () => {
+        skipWhitespace();
+        const start = position;
+        while (position < formula.length && /[0-9.]/.test(formula[position])) position += 1;
+        if (start === position) return false;
+        const value = formula.slice(start, position);
+        return /^(\d+(\.\d*)?|\.\d+)$/.test(value);
+      };
+      const parseFactor = () => {
+        skipWhitespace();
+        if (match("+") || match("-")) return parseFactor();
+        if (match("(")) {
+          if (!parseExpression()) return false;
+          return match(")");
+        }
+        if (formula[position] === "x" || formula[position] === "X") {
+          position += 1;
+          return true;
+        }
+        return parseNumber();
+      };
+      const parseTerm = () => {
+        if (!parseFactor()) return false;
+        while (true) {
+          skipWhitespace();
+          if (match("*") || match("/")) {
+            if (!parseFactor()) return false;
+          } else {
+            return true;
+          }
+        }
+      };
+      function parseExpression() {
+        if (!parseTerm()) return false;
+        while (true) {
+          skipWhitespace();
+          if (match("+") || match("-")) {
+            if (!parseTerm()) return false;
+          } else {
+            return true;
+          }
+        }
+      }
+      return parseExpression() && (skipWhitespace(), position === formula.length);
+    }
+
+    function validate(rule) {
+      const numericFields = ["minValue", "maxValue", "maxDelta", "rolloverMaxValue", "rolloverMinPreviousValue", "rolloverMaxCurrentValue"];
+      for (const field of numericFields) {
+        if (rule[field] && Number.isNaN(Number(rule[field]))) {
+          toast(`${field} 必须是数字`, "error");
+          return false;
+        }
+      }
+      if (!validateFormula(false)) {
+        toast("转换公式格式不正确或包含不支持字符", "error");
+        return false;
+      }
+      if (rule.rolloverEnabled && (!rule.rolloverMaxValue || !rule.rolloverMinPreviousValue || !rule.rolloverMaxCurrentValue)) {
+        toast("开启合法回零时需填写三个回零阈值", "error");
+        return false;
+      }
+      return true;
+    }
+
+    function upsert(rule) {
+      const index = rules.findIndex((item) => keyOf(item) === keyOf(rule));
+      if (index >= 0) rules[index] = { ...rules[index], ...rule };
+      else rules.push({ ...rule });
+    }
+
+    function saveForm() {
+      const rule = formValue();
+      if (!validate(rule)) return;
+      modalTargets.forEach((point) => {
+        const existing = findRule(point);
+        upsert({ ...rule, ...point, enabled: existing ? existing.enabled : true });
+      });
+      toast(`已保存 ${modalTargets.length} 个测点的清洗配置`, "info");
+      closeModal();
+      renderTable();
+    }
+
+    function batchTargets() {
+      return points.filter((point) => selected.has(keyOf(point)));
+    }
+
+    function openBatch() {
+      const targets = batchTargets();
+      if (!targets.length) {
+        toast("请先勾选要配置的测点", "warn");
+        return;
+      }
+      openModal(targets, "批量配置清洗规则");
+    }
+
+    function toggleRule(point, rule) {
+      const next = { ...(rule || defaultRule(point)), enabled: !(rule && rule.enabled) };
+      upsert(next);
+      toast(next.enabled ? "已启用配置" : "已停用配置", "info");
+      renderTable();
+    }
+
+    function batchDisable() {
+      const targets = batchTargets();
+      if (!targets.length) {
+        toast("请先勾选要停用的测点", "warn");
+        return;
+      }
+      targets.forEach((point) => upsert({ ...(findRule(point) || defaultRule(point)), enabled: false }));
+      toast(`已停用 ${targets.length} 个测点配置`, "info");
+      renderTable();
+    }
+
+    function resetFilters() {
+      $("modelFilter").value = "";
+      $("deviceFilter").value = "";
+      $("paramFilter").value = "";
+      $("nameFilter").value = "";
+      $("statusFilter").value = "";
+      $("cumulativeFilter").value = "";
+      refreshCustomSelects();
+      pageNo = 1;
+      renderTable();
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".side-item[data-page]").forEach((item) => {
+        item.addEventListener("click", () => switchPage(item.dataset.page));
+      });
+      ["modelFilter", "deviceFilter", "paramFilter", "nameFilter", "statusFilter", "cumulativeFilter"].forEach((id) => {
+        $(id).addEventListener("input", () => { pageNo = 1; renderTable(); });
+        $(id).addEventListener("change", () => { pageNo = 1; renderTable(); });
+      });
+      ["detailModelFilter", "detailDeviceFilter", "detailParamFilter", "detailNameFilter", "detailQualityFilter", "detailStartTime", "detailEndTime"].forEach((id) => {
+        $(id).addEventListener("input", applyDetailFilters);
+        $(id).addEventListener("change", applyDetailFilters);
+      });
+      $("detailStartTime").addEventListener("blur", () => validateDetailTime("detailStartTime"));
+      $("detailEndTime").addEventListener("blur", () => validateDetailTime("detailEndTime"));
+      $("queryBtn").addEventListener("click", () => { pageNo = 1; renderTable(); });
+      $("resetBtn").addEventListener("click", resetFilters);
+      $("batchBtn").addEventListener("click", openBatch);
+      $("batchDisableBtn").addEventListener("click", batchDisable);
+      $("reloadBtn").addEventListener("click", () => toast("已刷新清洗配置缓存", "info"));
+      $("detailQueryBtn").addEventListener("click", applyDetailFilters);
+      $("detailResetBtn").addEventListener("click", resetDetailFilters);
+      $("abnormalOnlyBtn").addEventListener("click", () => {
+        if (!validateTimeRange("detailStartTime", "detailEndTime")) return;
+        detailOnlyAbnormal = !detailOnlyAbnormal;
+        detailPageNo = 1;
+        renderDetailTable();
+      });
+      $("exportDetailBtn").addEventListener("click", () => {
+        if (!validateTimeRange("detailStartTime", "detailEndTime")) return;
+        toast(`已导出当前 ${filteredPointSummaries().length} 个点位清洗概况`, "info");
+      });
+      $("closeModalBtn").addEventListener("click", closeModal);
+      $("cancelBtn").addEventListener("click", closeModal);
+      $("saveBtn").addEventListener("click", saveForm);
+      $("closeDetailModalFootBtn").addEventListener("click", closeCleanDetail);
+      $("detailConfigBtn").addEventListener("click", () => {
+        const point = points.find((item) => keyOf(item) === activeDetailPointKey);
+        if (point) jumpToConfig(point);
+      });
+      $("detailRuleTrigger").addEventListener("click", (event) => {
+        event.stopPropagation();
+        $("detailRuleMulti").classList.toggle("open");
+      });
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest("#detailRuleMulti")) $("detailRuleMulti").classList.remove("open");
+      });
+      $("detailModalQueryBtn").addEventListener("click", applyDetailModalFilters);
+      $("detailModalResetBtn").addEventListener("click", resetDetailModalFilters);
+      $("detailModalStartTime").addEventListener("blur", validateDetailModalTime);
+      $("detailModalEndTime").addEventListener("blur", validateDetailModalTime);
+      $("formulaKeypad").addEventListener("click", (event) => {
+        const button = event.target.closest("button");
+        if (!button) return;
+        if (button.dataset.action === "backspace") backspaceFormula();
+        else if (button.dataset.action === "clear") setFormulaValue("", false);
+        else if (button.dataset.token) appendFormulaToken(button.dataset.token);
+      });
+      $("pageSize").addEventListener("change", () => { pageNo = 1; renderTable(); });
+      $("prevPageBtn").addEventListener("click", () => { pageNo = Math.max(1, pageNo - 1); renderTable(); });
+      $("nextPageBtn").addEventListener("click", () => { pageNo += 1; renderTable(); });
+      $("detailPageSize").addEventListener("change", () => { detailPageNo = 1; renderDetailTable(); });
+      $("detailPrevPageBtn").addEventListener("click", () => { detailPageNo = Math.max(1, detailPageNo - 1); renderDetailTable(); });
+      $("detailNextPageBtn").addEventListener("click", () => { detailPageNo += 1; renderDetailTable(); });
+      $("detailRecordPageSize").addEventListener("change", () => { detailRecordPageNo = 1; renderCleanDetailModal(); });
+      $("detailRecordPrevPageBtn").addEventListener("click", () => { detailRecordPageNo = Math.max(1, detailRecordPageNo - 1); renderCleanDetailModal(); });
+      $("detailRecordNextPageBtn").addEventListener("click", () => { detailRecordPageNo += 1; renderCleanDetailModal(); });
+      $("checkAll").addEventListener("change", (event) => {
+        pagedPoints(filteredPoints()).forEach((point) => {
+          if (event.target.checked) selected.add(keyOf(point));
+          else selected.delete(keyOf(point));
+        });
+        renderTable();
+      });
+    }
+
+    fillModels();
+    enhanceFilterSelects();
+    bindEvents();
+    renderTable();
+  </script>
+</body>
+</html>

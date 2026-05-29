@@ -127,7 +127,7 @@ public class TreeService {
                     LEFT JOIN basic_tenant_permission mp ON mp.tenant_id = sp.tenant_id AND mp.permission_type = 'MENU' AND mp.subsystem_id = s.id AND mp.granted = 1
                     LEFT JOIN basic_menu m ON m.id = mp.menu_id AND m.status = 'ENABLED' AND m.hidden = 0
                     WHERE sp.tenant_id = :tenantId AND sp.permission_type = 'SUBSYSTEM' AND sp.granted = 1
-                      AND s.status = 'ENABLED' AND s.subsystem_code = 'basic'
+                      AND s.status = 'ENABLED' AND s.subsystem_code IN ('basic', 'cleaning')
                     ORDER BY s.sort_order, m.parent_id, m.sort_order, m.id
                     """;
             params.put("tenantId", tenantId);

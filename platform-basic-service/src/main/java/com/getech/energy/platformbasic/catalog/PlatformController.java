@@ -28,13 +28,15 @@ public class PlatformController {
     private final ResourceService resourceService;
     private final TreeService treeService;
     private final MutationService mutationService;
+    private final CatalogActionService catalogActionService;
     private final LogClient logClient;
 
     public PlatformController(ResourceService resourceService, TreeService treeService, MutationService mutationService,
-                              LogClient logClient) {
+                              CatalogActionService catalogActionService, LogClient logClient) {
         this.resourceService = resourceService;
         this.treeService = treeService;
         this.mutationService = mutationService;
+        this.catalogActionService = catalogActionService;
         this.logClient = logClient;
     }
 
@@ -68,6 +70,14 @@ public class PlatformController {
     @PostMapping("/tenants/{id}/disable")
     public ApiResponse<Void> disableTenant(@PathVariable("id") Long id, HttpServletRequest request) {
         CurrentUser user = requirePlatformAdmin();
+        catalogActionService.apply(user, new CatalogActionRequest(
+                "platform.tenants",
+                "disableTenant",
+                "停用租户",
+                id,
+                null,
+                Map.of("statusAction", "disable")
+        ));
         logClient.operation(TraceContext.getTraceId(request), user, "platform.tenants", "DISABLE", "停用租户",
                 "basic_tenant", String.valueOf(id), request, true, "tenant disable accepted");
         return ApiResponse.ok(null, TraceContext.getTraceId(request));
@@ -133,14 +143,10 @@ public class PlatformController {
     public ApiResponse<Map<String, Object>> acceptAction(@Valid @RequestBody CatalogActionRequest body,
                                                          HttpServletRequest request) {
         CurrentUser user = requirePlatformAdmin();
+        Map<String, Object> result = catalogActionService.apply(user, body);
         logClient.operation(TraceContext.getTraceId(request), user, body.moduleCode(), body.actionCode(), body.actionName(),
                 body.moduleCode(), body.targetId() == null ? null : String.valueOf(body.targetId()), request, true,
                 "platform action accepted");
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("accepted", true);
-        result.put("moduleCode", body.moduleCode());
-        result.put("actionCode", body.actionCode());
-        result.put("targetId", body.targetId());
         return ApiResponse.ok(result, TraceContext.getTraceId(request));
     }
 

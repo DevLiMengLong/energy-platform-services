@@ -207,8 +207,8 @@ public class ResourceRegistry {
                 "d.id ASC"));
         add(new ResourceDefinition(
                 "basic.collection-points",
-                "basic_collection_point p",
-                "p.id, p.collection_model_mark AS collectionModelMark, p.collection_model_name AS collectionModelName, p.collection_device_mark AS collectionDeviceMark, p.collection_device_name AS collectionDeviceName, p.collection_param_mark AS collectionParamMark, p.collection_param_name AS collectionParamName, p.business_name AS businessName, p.data_type AS dataType, p.status",
+                "basic_collection_point p LEFT JOIN basic_device_param_point_binding b ON b.collection_point_id = p.id AND b.tenant_id = p.tenant_id LEFT JOIN basic_device_param dp ON dp.id = b.device_param_id AND dp.tenant_id = p.tenant_id",
+                "p.id, p.collection_model_mark AS collectionModelMark, p.collection_model_name AS collectionModelName, p.collection_device_mark AS collectionDeviceMark, p.collection_device_name AS collectionDeviceName, p.collection_param_mark AS collectionParamMark, p.collection_param_name AS collectionParamName, p.business_name AS businessName, COALESCE(dp.unit, '') AS unit, p.data_type AS dataType, p.status",
                 "1 = 1",
                 List.of("p.collection_model_mark", "p.collection_device_mark", "p.collection_param_mark", "p.business_name"),
                 Map.of(
