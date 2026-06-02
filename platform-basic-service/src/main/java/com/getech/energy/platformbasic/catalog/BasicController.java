@@ -62,12 +62,31 @@ public class BasicController {
         return ApiResponse.ok(null, TraceContext.getTraceId(request));
     }
 
+    @PostMapping("/org-nodes/{id}/delete")
+    public ApiResponse<Void> deleteOrg(@PathVariable("id") Long id, HttpServletRequest request) {
+        CurrentUser user = AuthContext.requireUser();
+        mutationService.deleteOrg(user, id);
+        logClient.operation(TraceContext.getTraceId(request), user, "basic.orgNodes", "DELETE", "删除组织",
+                "basic_org_node", String.valueOf(id), request, true, "organization deleted");
+        return ApiResponse.ok(null, TraceContext.getTraceId(request));
+    }
+
     @GetMapping("/users")
     public ApiResponse<PageResult> users(@RequestParam(name = "keyword", required = false) String keyword,
                                          @RequestParam(name = "page", defaultValue = "1") int page,
                                          @RequestParam(name = "size", defaultValue = "10") int size,
                                          HttpServletRequest request) {
         return page("basic.users", keyword, page, size, request);
+    }
+
+    @PostMapping("/users")
+    public ApiResponse<Map<String, Object>> createUser(@Valid @RequestBody UserRequest body,
+                                                       HttpServletRequest request) {
+        CurrentUser user = AuthContext.requireUser();
+        Map<String, Object> result = mutationService.createUser(user, body);
+        logClient.operation(TraceContext.getTraceId(request), user, "basic.users", "CREATE", "新增用户",
+                "basic_user", String.valueOf(result.get("id")), request, true, "user created");
+        return ApiResponse.ok(result, TraceContext.getTraceId(request));
     }
 
     @GetMapping("/user-groups")

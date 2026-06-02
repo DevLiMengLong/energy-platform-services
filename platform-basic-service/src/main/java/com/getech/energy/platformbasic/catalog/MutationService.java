@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -13,12 +14,16 @@ import org.springframework.util.StringUtils;
 @Service
 public class MutationService {
 
+    private static final String DEFAULT_USER_PASSWORD = "admin123";
+
     private final JdbcClient jdbcClient;
     private final CodeGenerator codeGenerator;
+    private final PasswordEncoder passwordEncoder;
 
-    public MutationService(JdbcClient jdbcClient, CodeGenerator codeGenerator) {
+    public MutationService(JdbcClient jdbcClient, CodeGenerator codeGenerator, PasswordEncoder passwordEncoder) {
         this.jdbcClient = jdbcClient;
         this.codeGenerator = codeGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -81,6 +86,46 @@ public class MutationService {
     }
 
     @Transactional
+    public Map<String, Object> createUser(CurrentUser user, UserRequest request) {
+        requireTenant(user);
+        Long orgId = resolveOrgId(user, request.orgName());
+        List<Map<String, Object>> roles = resolveRoles(user, request.roleName());
+        String roleType = roles.stream()
+                .anyMatch(role -> "TENANT_ADMIN".equals(role.get("roleCode"))) ? "TENANT_ADMIN" : "TENANT_USER";
+        try {
+            jdbcClient.sql("""
+                            INSERT INTO basic_user
+                            (tenant_id, org_id, account, username, phone, email, password_hash, role_type, status)
+                            VALUES (:tenantId, :orgId, :account, :username, :phone, :email, :passwordHash, :roleType, :status)
+                            """)
+                    .param("tenantId", user.tenantId())
+                    .param("orgId", orgId)
+                    .param("account", request.account())
+                    .param("username", request.username())
+                    .param("phone", request.phone())
+                    .param("email", request.email())
+                    .param("passwordHash", passwordEncoder.encode(DEFAULT_USER_PASSWORD))
+                    .param("roleType", roleType)
+                    .param("status", defaultStatus(request.status()))
+                    .update();
+        } catch (DuplicateKeyException ex) {
+            throw new ApiException("DUPLICATE_USER_ACCOUNT", "User account already exists");
+        }
+        Long userId = jdbcClient.sql("SELECT id FROM basic_user WHERE account = :account")
+                .param("account", request.account())
+                .query(Long.class)
+                .single();
+        for (Map<String, Object> role : roles) {
+            jdbcClient.sql("INSERT INTO basic_user_role (tenant_id, user_id, role_id) VALUES (:tenantId, :userId, :roleId)")
+                    .param("tenantId", user.tenantId())
+                    .param("userId", userId)
+                    .param("roleId", role.get("id"))
+                    .update();
+        }
+        return userById(user.tenantId(), userId);
+    }
+
+    @Transactional
     public Map<String, Object> createShift(CurrentUser user, ShiftRequest request) {
         requireTenant(user);
         String shiftCode = StringUtils.hasText(request.shiftCode())
@@ -129,6 +174,61 @@ public class MutationService {
         if (updated == 0) {
             throw new ApiException("ORG_NOT_FOUND", "Organization does not exist");
         }
+    }
+
+    @Transactional
+    public void deleteOrg(CurrentUser user, Long orgId) {
+        requireTenant(user);
+        List<Map<String, Object>> orgRows = jdbcClient.sql("""
+                        SELECT id, parent_id AS parentId
+                        FROM basic_org_node
+                        WHERE tenant_id = :tenantId AND id = :orgId AND deleted = 0
+                        """)
+                .param("tenantId", user.tenantId())
+                .param("orgId", orgId)
+                .query()
+                .listOfRows();
+        if (orgRows.isEmpty()) {
+            throw new ApiException("ORG_NOT_FOUND", "Organization does not exist");
+        }
+        if (orgRows.get(0).get("parentId") == null) {
+            throw new ApiException("ORG_ROOT_DELETE_NOT_ALLOWED", "Root organization cannot be deleted");
+        }
+
+        Long childCount = jdbcClient.sql("""
+                        SELECT COUNT(1)
+                        FROM basic_org_node
+                        WHERE tenant_id = :tenantId AND parent_id = :orgId AND deleted = 0
+                        """)
+                .param("tenantId", user.tenantId())
+                .param("orgId", orgId)
+                .query(Long.class)
+                .single();
+        if (childCount > 0) {
+            throw new ApiException("ORG_HAS_CHILDREN", "Organization with child nodes cannot be deleted");
+        }
+
+        Long userCount = jdbcClient.sql("""
+                        SELECT COUNT(1)
+                        FROM basic_user
+                        WHERE tenant_id = :tenantId AND org_id = :orgId
+                        """)
+                .param("tenantId", user.tenantId())
+                .param("orgId", orgId)
+                .query(Long.class)
+                .single();
+        if (userCount > 0) {
+            throw new ApiException("ORG_HAS_USERS", "Organization with users cannot be deleted");
+        }
+
+        jdbcClient.sql("""
+                        UPDATE basic_org_node
+                        SET deleted = 1, status = 'DISABLED', updated_at = CURRENT_TIMESTAMP
+                        WHERE tenant_id = :tenantId AND id = :orgId AND deleted = 0
+                        """)
+                .param("tenantId", user.tenantId())
+                .param("orgId", orgId)
+                .update();
     }
 
     @Transactional
@@ -289,6 +389,62 @@ public class MutationService {
 
     private String defaultStatus(String status) {
         return StringUtils.hasText(status) ? status : "ENABLED";
+    }
+
+    private Long resolveOrgId(CurrentUser user, String orgName) {
+        List<Map<String, Object>> rows = jdbcClient.sql("""
+                        SELECT id
+                        FROM basic_org_node
+                        WHERE tenant_id = :tenantId AND deleted = 0 AND status = 'ENABLED' AND org_name = :orgName
+                        ORDER BY id
+                        LIMIT 1
+                        """)
+                .param("tenantId", user.tenantId())
+                .param("orgName", orgName)
+                .query()
+                .listOfRows();
+        if (rows.isEmpty()) {
+            throw new ApiException("ORG_NOT_FOUND", "Organization does not exist");
+        }
+        return ((Number) rows.get(0).get("id")).longValue();
+    }
+
+    private List<Map<String, Object>> resolveRoles(CurrentUser user, List<String> roleNames) {
+        return roleNames.stream()
+                .distinct()
+                .map(roleName -> {
+                    List<Map<String, Object>> rows = jdbcClient.sql("""
+                                    SELECT id, role_code AS roleCode, role_name AS roleName
+                                    FROM basic_role
+                                    WHERE tenant_id = :tenantId AND status = 'ENABLED' AND role_name = :roleName
+                                    ORDER BY id
+                                    LIMIT 1
+                                    """)
+                            .param("tenantId", user.tenantId())
+                            .param("roleName", roleName)
+                            .query()
+                            .listOfRows();
+                    if (rows.isEmpty()) {
+                        throw new ApiException("ROLE_NOT_FOUND", "Role does not exist");
+                    }
+                    return rows.get(0);
+                })
+                .toList();
+    }
+
+    private Map<String, Object> userById(Long tenantId, Long userId) {
+        return jdbcClient.sql("""
+                        SELECT u.id, u.account, u.username, u.phone, u.email,
+                               (SELECT r.role_name FROM basic_user_role ur JOIN basic_role r ON r.id = ur.role_id WHERE ur.user_id = u.id ORDER BY r.id LIMIT 1) AS roleName,
+                               o.org_name AS orgName, u.status
+                        FROM basic_user u
+                        LEFT JOIN basic_org_node o ON o.id = u.org_id
+                        WHERE u.tenant_id = :tenantId AND u.id = :userId
+                        """)
+                .param("tenantId", tenantId)
+                .param("userId", userId)
+                .query()
+                .singleRow();
     }
 
     private List<Long> safeList(List<Long> values) {

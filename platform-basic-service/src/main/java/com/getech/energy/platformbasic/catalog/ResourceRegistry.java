@@ -103,6 +103,7 @@ public class ResourceRegistry {
                 "u.role_type IN ('TENANT_ADMIN', 'TENANT_USER')",
                 List.of("u.account", "u.username", "u.phone", "u.email"),
                 Map.of(
+                        "orgId", "u.org_id",
                         "phone", "u.phone",
                         "email", "u.email",
                         "roleName", userRoleName,

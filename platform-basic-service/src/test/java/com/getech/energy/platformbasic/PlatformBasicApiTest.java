@@ -1,7 +1,8 @@
 package com.getech.energy.platformbasic;
 
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -123,6 +124,23 @@ class PlatformBasicApiTest {
     }
 
     @Test
+    void usersSupportOrganizationNodeFilter() throws Exception {
+        String token = login("tenant_a_admin", "admin123");
+
+        mockMvc.perform(get("/api/basic/users?orgId=2&page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(10))
+                .andExpect(jsonPath("$.data.rows[0].orgName").value("一号车间"));
+
+        mockMvc.perform(get("/api/basic/users?orgId=4&page=1&size=20")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(9))
+                .andExpect(jsonPath("$.data.rows[0].orgName").value("设备部"));
+    }
+
+    @Test
     void platformAdminCanCreateTenantWithGeneratedCode() throws Exception {
         String token = login("admin", "admin123");
 
@@ -162,6 +180,110 @@ class PlatformBasicApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.energyCode", startsWith("ENERGY_")))
                 .andExpect(jsonPath("$.data.energyName").value("蒸汽"));
+    }
+
+    @Test
+    void tenantAdminCanCreateUserWithRoleAndOrgBindings() throws Exception {
+        String token = login("tenant_a_admin", "admin123");
+
+        mockMvc.perform(post("/api/basic/users")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "account": "qa_created_user",
+                                  "username": "测试新增用户",
+                                  "phone": "13800138000",
+                                  "email": "qa_created_user@example.com",
+                                  "roleName": ["能源主管"],
+                                  "orgName": "一号车间",
+                                  "status": "ENABLED"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("SUCCESS"))
+                .andExpect(jsonPath("$.data.account").value("qa_created_user"))
+                .andExpect(jsonPath("$.data.username").value("测试新增用户"))
+                .andExpect(jsonPath("$.data.roleName").value("能源主管"))
+                .andExpect(jsonPath("$.data.orgName").value("一号车间"));
+
+        Long userId = jdbcClient.sql("SELECT id FROM basic_user WHERE account = 'qa_created_user'")
+                .query(Long.class)
+                .single();
+        String roleName = jdbcClient.sql("""
+                        SELECT r.role_name
+                        FROM basic_user_role ur
+                        JOIN basic_role r ON r.id = ur.role_id
+                        WHERE ur.user_id = :userId
+                        """)
+                .param("userId", userId)
+                .query(String.class)
+                .single();
+        org.assertj.core.api.Assertions.assertThat(roleName).isEqualTo("能源主管");
+    }
+
+    @Test
+    void createUserRejectsInvalidFieldFormats() throws Exception {
+        String token = login("tenant_a_admin", "admin123");
+
+        mockMvc.perform(post("/api/basic/users")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "account": "阿水大师的",
+                                  "username": "阿dasd",
+                                  "phone": "1312312312312312312",
+                                  "email": "12312312312",
+                                  "roleName": ["租户超管"],
+                                  "orgName": "全链路测试工厂",
+                                  "status": "ENABLED"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message", containsString("account format")))
+                .andExpect(jsonPath("$.message", containsString("phone format")))
+                .andExpect(jsonPath("$.message", containsString("email format")));
+    }
+
+    @Test
+    void unsupportedHttpMethodsReturnMethodNotAllowed() throws Exception {
+        String token = login("tenant_a_admin", "admin123");
+
+        mockMvc.perform(post("/api/basic/dictionaries")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
+                .andExpect(jsonPath("$.message", containsString("Request method 'POST' is not supported")));
+    }
+
+    @Test
+    void tenantAdminCanDeleteLeafOrgNode() throws Exception {
+        Long orgId = 9001L;
+        jdbcClient.sql("""
+                        INSERT INTO basic_org_node (id, tenant_id, parent_id, org_code, org_name, sort_order, status)
+                        VALUES (:id, 1, 1, 'ORG_DELETE_TEST', '待删除组织', 99, 'ENABLED')
+                        """)
+                .param("id", orgId)
+                .update();
+        String token = login("tenant_a_admin", "admin123");
+
+        mockMvc.perform(post("/api/basic/org-nodes/{id}/delete", orgId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("SUCCESS"));
+
+        Integer deleted = jdbcClient.sql("SELECT deleted FROM basic_org_node WHERE id = :id")
+                .param("id", orgId)
+                .query(Integer.class)
+                .single();
+        org.assertj.core.api.Assertions.assertThat(deleted).isEqualTo(1);
+
+        mockMvc.perform(get("/api/basic/org-nodes/tree?keyword=待删除组织")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(0));
     }
 
     @Test

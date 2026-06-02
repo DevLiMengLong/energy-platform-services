@@ -91,6 +91,11 @@ public class ResourceService {
                 return;
             }
             String paramName = "filter_" + key;
+            if (key.endsWith("Id")) {
+                where.append(" AND ").append(column).append(" = :").append(paramName);
+                params.put(paramName, value);
+                return;
+            }
             where.append(" AND LOWER(CONCAT('', ").append(column).append(")) LIKE :").append(paramName);
             params.put(paramName, "%" + value.toLowerCase() + "%");
         });
